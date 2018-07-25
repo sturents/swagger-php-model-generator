@@ -1,0 +1,21 @@
+{
+	"name": "sturents/swagger-generator",
+    "license": "MIT",
+	"authors": [
+		{
+			"name": "m1ke",
+			"email": "mike@m1ke.me"
+		}
+	],
+	"require": {
+		"php": ">=7.0",
+		"nette/php-generator": "^3.0",
+		"symfony/yaml": "^3.4",
+		"symfony/serializer": "^3.4"
+	},
+	"autoload": {
+		"psr-4": {
+			"SwaggerGen\\": "src/"
+		}
+	}
+}
