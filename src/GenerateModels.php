@@ -119,7 +119,7 @@ class GenerateModels {
 				->addComment("@return \$this");
 
 			$set_parameter = $setter->addParameter($property_name);
-			if (!in_array($type, ['integer', 'string', 'boolean'])){
+			if ($this->notScalarType($type)){
 				$set_parameter->setTypeHint($typehint);
 			}
 
@@ -132,7 +132,7 @@ class GenerateModels {
 				$add_to = $class->addMethod('add'.$capital_case_singular)->setBody("\$this->{$property_name}[] = \$$property_name_singular;\n\nreturn \$this;")->addComment("@param $sub_type \$$property_name_singular")->addComment('')->addComment("@return \$this");
 
 				$set_parameter = $add_to->addParameter($property_name_singular);
-				if (!in_array($sub_type, ['integer', 'string', 'boolean', 'number'])){
+				if ($this->notScalarType($sub_type)){
 					$set_parameter->setTypeHint($sub_typehint);
 				}
 			}
@@ -191,5 +191,13 @@ class GenerateModels {
 		}
 
 		return str_replace('#/definitions/', '', $property['$ref']);
+	}
+
+	/**
+	 * @param $type
+	 * @return bool
+	 */
+	private function notScalarType($type){
+		return !in_array($type, ['integer', 'string', 'boolean', 'number']);
 	}
 }
