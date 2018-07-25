@@ -132,7 +132,7 @@ class GenerateModels {
 				$add_to = $class->addMethod('add'.$capital_case_singular)->setBody("\$this->{$property_name}[] = \$$property_name_singular;\n\nreturn \$this;")->addComment("@param $sub_type \$$property_name_singular")->addComment('')->addComment("@return \$this");
 
 				$set_parameter = $add_to->addParameter($property_name_singular);
-				if (!in_array($sub_type, ['integer', 'string', 'boolean'])){
+				if (!in_array($sub_type, ['integer', 'string', 'boolean', 'number'])){
 					$set_parameter->setTypeHint($sub_typehint);
 				}
 			}
