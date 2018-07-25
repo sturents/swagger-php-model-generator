@@ -11,7 +11,8 @@
 		"php": ">=7.0",
 		"nette/php-generator": "^3.0",
 		"symfony/yaml": "^3.4",
-		"symfony/serializer": "^3.4"
+		"symfony/serializer": "^3.4",
+		"psr/http-message": "^1.0"
 	},
 	"autoload": {
 		"psr-4": {

@@ -3,11 +3,13 @@
 require __DIR__.'/vendor/autoload.php';
 
 use SwaggerGen\GenerateModels;
+use SwaggerGen\GenerateRequests;
 
 $opt_fields  = [
-	"yaml-path",     // Required value
-	"namespace",     // Required value
-	"model-dir",     // Required value
+	"yaml-path",
+	"namespace",
+	"dir",
+	"uri",
 ];
 $options = getopt("", array_map(function($option){
 	return "{$option}:";
@@ -23,12 +25,22 @@ if (!empty($opt_errors)){
 	throw new Exception("The following option errors were encountered: \n".implode("\n", $opt_errors)."\n");
 }
 
+$options['namespace'] = "{$options['namespace']}\\Models";
+
 echo "Generating models under namespace '{$options['namespace']}' from the YAML file at '{$options['yaml-path']}'\n";
 
 $generator = new GenerateModels($options['namespace']);
 $generator->generate($options['yaml-path']);
 
-echo "Saving ".count($generator->classes)." files to {$options['model-dir']}\n";
-$generator->saveClasses($options['model-dir']);
+$model_dir = "{$options['dir']}/Models";
+echo "Saving ".count($generator->classes)." files to {$model_dir}\n";
+$generator->saveClasses($model_dir);
+
+$generator = new GenerateRequests($options['namespace'], $options['uri']);
+$generator->generate($options['yaml-path']);
+
+$request_dir = "{$options['dir']}/Requests";
+echo "Saving ".count($generator->classes)." files to {$request_dir}\n";
+$generator->saveClasses($request_dir);
 
 echo "Done\n";
