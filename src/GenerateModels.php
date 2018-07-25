@@ -43,9 +43,10 @@ class GenerateModels {
 		foreach ($api['definitions'] as $class_name => $class_details){
 
 			$class = new ClassType($class_name, $namespace);
+			$class->addComment("** This file was generated automatically, you might want to avoid editing it **");
 
 			if (!empty($class_details['description'])){
-				$class->addComment($class_details['description']);
+				$class->addComment("\n".$class_details['description']);
 			}
 
 			if (isset($class_details['allOf'])){
