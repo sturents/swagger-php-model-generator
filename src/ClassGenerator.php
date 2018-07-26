@@ -7,6 +7,8 @@ namespace SwaggerGen;
 use Nette\PhpGenerator\ClassType;
 
 class ClassGenerator {
+	const REQUEST_CLASS_NAME = 'SwaggerRequest';
+
 	/**
 	 * @var string
 	 */
@@ -49,8 +51,13 @@ class ClassGenerator {
 		$namespace_name = $this->namespace_name;
 
 		foreach ($this->classes as $class_name => $class){
+			$use = '';
+			if ($class_name===self::REQUEST_CLASS_NAME){
+				$use = "\nuse Psr\\Http\\Message\\MessageInterface;\n";
+			}
+
 			$php_file = (string) $class;
-			$php_file = "<?php\n\nnamespace $namespace_name;\n\n$php_file\n";
+			$php_file = "<?php\nnamespace $namespace_name;\n$use\n$php_file\n";
 			file_put_contents("{$dir}/{$class_name}.php", $php_file);
 		}
 	}
