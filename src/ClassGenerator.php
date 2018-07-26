@@ -53,7 +53,7 @@ class ClassGenerator {
 		foreach ($this->classes as $class_name => $class){
 			$use = '';
 			if ($class_name===self::REQUEST_CLASS_NAME){
-				$use = "\nuse Psr\\Http\\Message\\MessageInterface;\n";
+				$use = "\nuse Psr\\Http\\Message\\RequestInterface;\n";
 			}
 
 			$php_file = (string) $class;
