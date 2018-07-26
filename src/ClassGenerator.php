@@ -51,14 +51,7 @@ abstract class ClassGenerator {
 			throw new \Exception("No classes were created, try running the generate() method first");
 		}
 
-		if (!file_exists($dir)){
-			mkdir($dir, 0775, true);
-		}
-		if (!file_exists($dir)){
-			throw new \Exception("The directory $dir did not exist and could not be created");
-		}
-
-		$dir = $this->stringNotEndWith($dir, '/');
+		$dir = $this->checkDir($dir);
 
 		foreach ($this->classes as $class_name => $class){
 			$use = '';
@@ -72,13 +65,18 @@ abstract class ClassGenerator {
 	abstract public function dumpParentClass(string $dir);
 
 	/**
+	 * @param string $dir
 	 * @param string $file
 	 * @param string $namespace
+	 * @throws \Exception
 	 */
-	protected function dumpParentInternal(string $file, string $namespace){
+	protected function dumpParentInternal(string $dir, string $file, string $namespace){
+		$dir = $this->checkDir($dir);
+
 		$content = file_get_contents($file);
 		$content = str_replace("\nnamespace ".__NAMESPACE__.";", "\nnamespace {$namespace};", $content);
-		file_put_contents($file, $content);
+		$file_name = basename($file);
+		file_put_contents("$dir/$file_name", $content);
 	}
 
 	/**
@@ -104,5 +102,23 @@ abstract class ClassGenerator {
 		}
 
 		return str_replace('#/definitions/', '', $property['$ref']);
+	}
+
+	/**
+	 * @param string $dir
+	 * @return string
+	 * @throws \Exception
+	 */
+	private function checkDir(string $dir){
+		if (!file_exists($dir)){
+			mkdir($dir, 0775, true);
+		}
+		if (!file_exists($dir)){
+			throw new \Exception("The directory $dir did not exist and could not be created");
+		}
+
+		$dir = $this->stringNotEndWith($dir, '/');
+
+		return $dir;
 	}
 }

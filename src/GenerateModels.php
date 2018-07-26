@@ -25,7 +25,7 @@ class GenerateModels extends ClassGenerator {
 		foreach ($api['definitions'] as $class_name => $class_details){
 
 			$class = new ClassType($class_name, $namespace);
-			$class->setExtends(self::MODEL_CLASS_NAME);
+			$class->setExtends("$namespace_name\\".self::MODEL_CLASS_NAME);
 			$class->addComment("** This file was generated automatically, you might want to avoid editing it **");
 
 			if (!empty($class_details['description'])){
@@ -137,7 +137,7 @@ class GenerateModels extends ClassGenerator {
 	public function dumpParentClass(string $dir){
 		$file = __DIR__.'/SwaggerModel.php';
 		$namespace = $this->namespaceModel();
-		$this->dumpParentInternal($file, $namespace);
+		$this->dumpParentInternal($dir, $file, $namespace);
 	}
 
 	/**
