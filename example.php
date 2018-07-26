@@ -25,22 +25,20 @@ if (!empty($opt_errors)){
 	throw new Exception("The following option errors were encountered: \n".implode("\n", $opt_errors)."\n");
 }
 
-echo "Generating models under namespace '{$options['namespace']}' from the YAML file at '{$options['yaml-path']}'\n";
+echo "Generating models under namespace '{$options['namespace']}' from the YAML file at '{$options['yaml-path']}', will save to {$options['dir']}\n";
 
 $generator = new GenerateModels("{$options['namespace']}");
 $generator->generate($options['yaml-path']);
 
-$model_dir = "{$options['dir']}/Models";
-echo "Saving ".count($generator->classes)." files to {$model_dir}\n";
-$generator->saveClasses($model_dir);
-$generator->dumpParentClass($model_dir);
+$generator->saveClasses($options['dir']);
+$generator->dumpParentClass($options['dir']);
+echo "Saved ".count($generator->classes)." request classes\n";
 
 $generator = new GenerateRequests("{$options['namespace']}", $options['uri']);
 $generator->generate($options['yaml-path']);
 
-$request_dir = "{$options['dir']}/Requests";
-echo "Saving ".count($generator->classes)." files to {$request_dir}\n";
-$generator->saveClasses($request_dir);
-$generator->dumpParentClass($request_dir);
+$generator->saveClasses($options['dir']);
+$generator->dumpParentClass($options['dir']);
+echo "Saved ".count($generator->classes)." request classes\n";
 
 echo "Done\n";

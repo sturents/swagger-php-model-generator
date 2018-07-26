@@ -10,6 +10,9 @@ abstract class ClassGenerator {
 	const REQUEST_CLASS_NAME = 'SwaggerRequest';
 	const MODEL_CLASS_NAME = 'SwaggerModel';
 
+	const NAMESPACE_MODEL = 'Models';
+	const NAMESPACE_REQUEST = 'Requests';
+
 	/**
 	 * @var string
 	 */
@@ -30,11 +33,11 @@ abstract class ClassGenerator {
 	}
 
 	protected function namespaceModel(){
-		return "{$this->namespace_name}\\Models";
+		return "{$this->namespace_name}\\".self::NAMESPACE_MODEL;
 	}
 
 	protected function namespaceRequest(){
-		return "{$this->namespace_name}\\Requests";
+		return "{$this->namespace_name}\\".self::NAMESPACE_REQUEST;
 	}
 
 	abstract public function saveClasses(string $dir);
@@ -56,7 +59,7 @@ abstract class ClassGenerator {
 		foreach ($this->classes as $class_name => $class){
 			$use = '';
 
-			$php_file = (string) $class;
+			$php_file = (string)$class;
 			$php_file = "<?php\nnamespace $namespace_name;\n$use\n$php_file\n";
 			file_put_contents("{$dir}/{$class_name}.php", $php_file);
 		}
@@ -87,7 +90,7 @@ abstract class ClassGenerator {
 	 * @return string
 	 */
 	protected function stringNotEndWith(string $string, string $char){
-		return $string[strlen($string)-1]===$char ? substr($string, 0, -1): $string;
+		return $string[strlen($string)-1]===$char ? substr($string, 0, -1) : $string;
 	}
 
 	/**
@@ -106,6 +109,17 @@ abstract class ClassGenerator {
 
 	/**
 	 * @param string $dir
+	 * @param string $namespace
+	 * @return string
+	 */
+	protected function dirNamespace(string $dir, string $namespace){
+		$dir = $this->stringNotEndWith($dir, '/');
+
+		return "$dir/$namespace";
+	}
+
+	/**
+	 * @param string $dir
 	 * @return string
 	 * @throws \Exception
 	 */
@@ -116,8 +130,6 @@ abstract class ClassGenerator {
 		if (!file_exists($dir)){
 			throw new \Exception("The directory $dir did not exist and could not be created");
 		}
-
-		$dir = $this->stringNotEndWith($dir, '/');
 
 		return $dir;
 	}

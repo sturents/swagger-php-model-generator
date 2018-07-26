@@ -134,7 +134,12 @@ class GenerateRequests extends ClassGenerator {
 		return $path_params;
 	}
 
+	/**
+	 * @param string $dir
+	 * @throws \Exception
+	 */
 	public function saveClasses(string $dir){
+		$dir = $this->dirNamespace($dir, self::NAMESPACE_REQUEST);
 		$this->saveClassesInternal($dir, $this->namespaceRequest());
 	}
 

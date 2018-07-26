@@ -83,7 +83,7 @@ class GenerateModels extends ClassGenerator {
 			}
 			else {
 				$comment_type = $type;
-				$sub_type  = $sub_typehint = '';
+				$sub_type = $sub_typehint = '';
 			}
 
 			$property->addComment("@var $comment_type");
@@ -113,7 +113,11 @@ class GenerateModels extends ClassGenerator {
 				/**
 				 * @var Method $add_to
 				 */
-				$add_to = $class->addMethod('add'.$capital_case_singular)->setBody("\$this->{$property_name}[] = \$$property_name_singular;\n\nreturn \$this;")->addComment("@param $sub_type \$$property_name_singular")->addComment('')->addComment("@return \$this");
+				$add_to = $class->addMethod('add'.$capital_case_singular)
+					->setBody("\$this->{$property_name}[] = \$$property_name_singular;\n\nreturn \$this;")
+					->addComment("@param $sub_type \$$property_name_singular")
+					->addComment('')
+					->addComment("@return \$this");
 
 				$set_parameter = $add_to->addParameter($property_name_singular);
 				if ($this->notScalarType($sub_type)){
@@ -128,6 +132,7 @@ class GenerateModels extends ClassGenerator {
 	 * @throws \Exception
 	 */
 	public function saveClasses(string $dir){
+		$dir = $this->dirNamespace($dir, self::NAMESPACE_MODEL);
 		$this->saveClassesInternal($dir, $this->namespaceModel());
 	}
 
