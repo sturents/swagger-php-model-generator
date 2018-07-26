@@ -8,6 +8,7 @@ use Nette\PhpGenerator\ClassType;
 
 abstract class ClassGenerator {
 	const REQUEST_CLASS_NAME = 'SwaggerRequest';
+	const MODEL_CLASS_NAME = 'SwaggerModel';
 
 	/**
 	 * @var string
@@ -63,6 +64,9 @@ abstract class ClassGenerator {
 			$use = '';
 			if ($class_name===self::REQUEST_CLASS_NAME){
 				$use = "\nuse Psr\\Http\\Message\\RequestInterface;\n";
+			}
+			if ($class_name===self::MODEL_CLASS_NAME){
+				$use = "\nuse JsonSerializable;\n";
 			}
 
 			$php_file = (string) $class;

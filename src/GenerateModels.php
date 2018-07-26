@@ -22,9 +22,15 @@ class GenerateModels extends ClassGenerator {
 
 		$namespace = new PhpNamespace($namespace_name);
 
+		$swagger_model = SwaggerModelProvider::swaggerModel();
+		$base_class = ClassType::from($swagger_model);
+		$base_class->setName(self::MODEL_CLASS_NAME);
+		$this->classes[$base_class->getName()] = $base_class;
+
 		foreach ($api['definitions'] as $class_name => $class_details){
 
 			$class = new ClassType($class_name, $namespace);
+			$class->setExtends(self::MODEL_CLASS_NAME);
 			$class->addComment("** This file was generated automatically, you might want to avoid editing it **");
 
 			if (!empty($class_details['description'])){

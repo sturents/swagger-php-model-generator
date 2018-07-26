@@ -43,8 +43,6 @@ class GenerateRequests extends ClassGenerator {
 				$class->addConstant('URI', "{$this->base_uri}/{$path_no_params}");
 				$class->addConstant('METHOD', strtoupper($method));
 
-				$constructor = $class->addMethod('__construct');
-
 				$method_details['parameters'] = $method_details['parameters'] ?: [];
 				$path_params = [];
 				foreach ($method_details['parameters'] as $parameter){
@@ -57,25 +55,30 @@ class GenerateRequests extends ClassGenerator {
 							if (!empty($schema)){
 								$type = $this->typeFromRef($schema);
 								$name = strtolower($parameter['name']);
-								$class->addMethod('setBody')->addParameter($name)->setTypeHint("\\$model_ns\\$type");
+								$model_class = "\\$model_ns\\$type";
+								$class->addMethod('setBody')->addComment("@param $model_class \$$name")->setBody("\$this->body = json_encode(\$$name);")->addParameter($name)->setTypeHint($model_class);
 							}
 						break;
 					}
 				}
 
-				$param_names = [];
-				foreach ($path_params as $path_param){
-					$param_name = $path_param['name'];
-					$param_names[] = $param_name;
-					$constructor->addParameter($param_name);
-					$class->addProperty($param_name)->addComment($path_param['description'])->addComment('')->addComment("@var {$path_param['type']}");
-					$constructor->addBody("\$this->$param_name = \$$param_name;");
-				}
-				if (!empty($param_names)){
-					$class->addProperty('param_names')
-						->setStatic(true)
-						->setValue($param_names)
-						->setVisibility('protected');
+				if (!empty($path_params)){
+					$constructor = $class->addMethod('__construct');
+					$param_names = [];
+					foreach ($path_params as $path_param){
+						$param_name = $path_param['name'];
+						$param_names[] = $param_name;
+						$constructor->addParameter($param_name);
+						$class->addProperty($param_name)->addComment($path_param['description'])->addComment('')->addComment("@var {$path_param['type']}");
+						$constructor->addBody("\$this->$param_name = \$$param_name;");
+					}
+
+					if (!empty($param_names)){
+						$class->addProperty('param_names')
+							->setStatic(true)
+							->setValue($param_names)
+							->setVisibility('protected');
+					}
 				}
 
 				$this->classes[$class_name] = $class;
