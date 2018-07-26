@@ -62,17 +62,23 @@ abstract class ClassGenerator {
 
 		foreach ($this->classes as $class_name => $class){
 			$use = '';
-			if ($class_name===self::REQUEST_CLASS_NAME){
-				$use = "\nuse Psr\\Http\\Message\\RequestInterface;\n";
-			}
-			if ($class_name===self::MODEL_CLASS_NAME){
-				$use = "\nuse JsonSerializable;\n";
-			}
 
 			$php_file = (string) $class;
 			$php_file = "<?php\nnamespace $namespace_name;\n$use\n$php_file\n";
 			file_put_contents("{$dir}/{$class_name}.php", $php_file);
 		}
+	}
+
+	abstract public function dumpParentClass(string $dir);
+
+	/**
+	 * @param string $file
+	 * @param string $namespace
+	 */
+	protected function dumpParentInternal(string $file, string $namespace){
+		$content = file_get_contents($file);
+		$content = str_replace("\nnamespace ".__NAMESPACE__.";", "\nnamespace {$namespace};", $content);
+		file_put_contents($file, $content);
 	}
 
 	/**

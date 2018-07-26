@@ -33,6 +33,7 @@ $generator->generate($options['yaml-path']);
 $model_dir = "{$options['dir']}/Models";
 echo "Saving ".count($generator->classes)." files to {$model_dir}\n";
 $generator->saveClasses($model_dir);
+$generator->dumpParentClass($model_dir);
 
 $generator = new GenerateRequests("{$options['namespace']}", $options['uri']);
 $generator->generate($options['yaml-path']);
@@ -40,5 +41,6 @@ $generator->generate($options['yaml-path']);
 $request_dir = "{$options['dir']}/Requests";
 echo "Saving ".count($generator->classes)." files to {$request_dir}\n";
 $generator->saveClasses($request_dir);
+$generator->dumpParentClass($request_dir);
 
 echo "Done\n";

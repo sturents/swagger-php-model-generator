@@ -24,12 +24,6 @@ class GenerateRequests extends ClassGenerator {
 	public function generate(string $file_path){
 		$api = Yaml::parseFile($file_path);
 
-		$swagger_request = SwaggerRequestProvider::swaggerRequest();
-		$base_class = ClassType::from($swagger_request);
-		$base_class->setName(self::REQUEST_CLASS_NAME);
-		$base_class->setImplements(['RequestInterface']);
-		$this->classes[$base_class->getName()] = $base_class;
-
 		$model_ns = $this->namespaceModel();
 		foreach ($api['paths'] as $path => $path_details){
 			$path_no_params = $this->pathNoParams($path);
@@ -88,6 +82,15 @@ class GenerateRequests extends ClassGenerator {
 
 	public function saveClasses(string $dir){
 		$this->saveClassesInternal($dir, $this->namespaceRequest());
+	}
+
+	/**
+	 * @param string $dir
+	 */
+	public function dumpParentClass(string $dir){
+		$file = __DIR__.'/SwaggerRequest.php';
+		$namespace = $this->namespaceRequest();
+		$this->dumpParentInternal($file, $namespace);
 	}
 
 	/**

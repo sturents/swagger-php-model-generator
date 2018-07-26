@@ -22,11 +22,6 @@ class GenerateModels extends ClassGenerator {
 
 		$namespace = new PhpNamespace($namespace_name);
 
-		$swagger_model = SwaggerModelProvider::swaggerModel();
-		$base_class = ClassType::from($swagger_model);
-		$base_class->setName(self::MODEL_CLASS_NAME);
-		$this->classes[$base_class->getName()] = $base_class;
-
 		foreach ($api['definitions'] as $class_name => $class_details){
 
 			$class = new ClassType($class_name, $namespace);
@@ -128,8 +123,21 @@ class GenerateModels extends ClassGenerator {
 		}
 	}
 
+	/**
+	 * @param string $dir
+	 * @throws \Exception
+	 */
 	public function saveClasses(string $dir){
 		$this->saveClassesInternal($dir, $this->namespaceModel());
+	}
+
+	/**
+	 * @param string $dir
+	 */
+	public function dumpParentClass(string $dir){
+		$file = __DIR__.'/SwaggerModel.php';
+		$namespace = $this->namespaceModel();
+		$this->dumpParentInternal($file, $namespace);
 	}
 
 	/**
