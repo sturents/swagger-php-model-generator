@@ -6,13 +6,13 @@ namespace SwaggerGen;
 
 use Nette\PhpGenerator\ClassType;
 
-class ClassGenerator {
+abstract class ClassGenerator {
 	const REQUEST_CLASS_NAME = 'SwaggerRequest';
 
 	/**
 	 * @var string
 	 */
-	protected $namespace_name;
+	private $namespace_name;
 
 	/**
 	 * @var ClassType[]
@@ -28,13 +28,24 @@ class ClassGenerator {
 		$this->namespace_name = $this->stringNotEndWith($namespace_name, '\\');
 	}
 
+	protected function namespaceModel(){
+		return "{$this->namespace_name}\\Models";
+	}
+
+	protected function namespaceRequest(){
+		return "{$this->namespace_name}\\Requests";
+	}
+
+	abstract public function saveClasses(string $dir);
+
 	/**
 	 * Saves generated classes down as PHP files
 	 *
 	 * @param string $dir
+	 * @param string $namespace_name
 	 * @throws \Exception
 	 */
-	public function saveClasses(string $dir){
+	protected function saveClassesInternal(string $dir, $namespace_name){
 		if (empty($this->classes)){
 			throw new \Exception("No classes were created, try running the generate() method first");
 		}
@@ -47,8 +58,6 @@ class ClassGenerator {
 		}
 
 		$dir = $this->stringNotEndWith($dir, '/');
-
-		$namespace_name = $this->namespace_name;
 
 		foreach ($this->classes as $class_name => $class){
 			$use = '';
@@ -71,5 +80,19 @@ class ClassGenerator {
 	 */
 	protected function stringNotEndWith(string $string, string $char){
 		return $string[strlen($string)-1]===$char ? substr($string, 0, -1): $string;
+	}
+
+	/**
+	 * Changes a Swagger definition into a type
+	 *
+	 * @param array $property
+	 * @return string
+	 */
+	protected function typeFromRef(array $property){
+		if (!isset($property['$ref'])){
+			return $property['type'];
+		}
+
+		return str_replace('#/definitions/', '', $property['$ref']);
 	}
 }

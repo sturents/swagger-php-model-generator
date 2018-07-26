@@ -27,14 +27,14 @@ if (!empty($opt_errors)){
 
 echo "Generating models under namespace '{$options['namespace']}' from the YAML file at '{$options['yaml-path']}'\n";
 
-$generator = new GenerateModels("{$options['namespace']}\\Models");
+$generator = new GenerateModels("{$options['namespace']}");
 $generator->generate($options['yaml-path']);
 
 $model_dir = "{$options['dir']}/Models";
 echo "Saving ".count($generator->classes)." files to {$model_dir}\n";
 $generator->saveClasses($model_dir);
 
-$generator = new GenerateRequests("{$options['namespace']}\\Requests", $options['uri']);
+$generator = new GenerateRequests("{$options['namespace']}", $options['uri']);
 $generator->generate($options['yaml-path']);
 
 $request_dir = "{$options['dir']}/Requests";

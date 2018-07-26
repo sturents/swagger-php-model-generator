@@ -16,7 +16,7 @@ class GenerateModels extends ClassGenerator {
 	 * @param string $file_path
 	 */
 	public function generate(string $file_path){
-		$namespace_name = $this->namespace_name;
+		$namespace_name = $this->namespaceModel();
 
 		$api = Yaml::parseFile($file_path);
 
@@ -52,7 +52,7 @@ class GenerateModels extends ClassGenerator {
 	 */
 	private function classProperties(array $properties, ClassType $class){
 		$converter = new CamelCaseToSnakeCaseNameConverter;
-		$namespace_name = $this->namespace_name;
+		$namespace_name = $this->namespaceModel();
 
 		foreach ($properties as $property_name => $property_details){
 			if (isset($property_details['$ref'])){
@@ -122,18 +122,8 @@ class GenerateModels extends ClassGenerator {
 		}
 	}
 
-	/**
-	 * Changes a Swagger definition into a type
-	 *
-	 * @param array $property
-	 * @return string
-	 */
-	private function typeFromRef(array $property){
-		if (!isset($property['$ref'])){
-			return $property['type'];
-		}
-
-		return str_replace('#/definitions/', '', $property['$ref']);
+	public function saveClasses(string $dir){
+		$this->saveClassesInternal($dir, $this->namespaceModel());
 	}
 
 	/**
