@@ -14,6 +14,8 @@ class SwaggerRequest implements RequestInterface {
 
 	protected static $param_names = [];
 
+	protected $headers = [];
+
 	/**
 	 * Retrieves the HTTP protocol version as a string.
 	 *
@@ -39,7 +41,7 @@ class SwaggerRequest implements RequestInterface {
 	 * @return static
 	 */
 	public function withProtocolVersion($version){
-		$this->notImplemented();
+		return clone $this;
 	}
 
 	/**
@@ -68,7 +70,7 @@ class SwaggerRequest implements RequestInterface {
 	 *     for that header.
 	 */
 	public function getHeaders(){
-		// TODO: Implement getHeaders() method.
+		return $this->headers;
 	}
 
 	/**
@@ -80,7 +82,7 @@ class SwaggerRequest implements RequestInterface {
 	 *     no matching header name is found in the message.
 	 */
 	public function hasHeader($name){
-		// TODO: Implement hasHeader() method.
+		return isset($this->headers[$name]);
 	}
 
 	/**
@@ -98,7 +100,7 @@ class SwaggerRequest implements RequestInterface {
 	 *    return an empty array.
 	 */
 	public function getHeader($name){
-		// TODO: Implement getHeader() method.
+		return $this->headers[$name] ?: [];
 	}
 
 	/**
@@ -121,7 +123,7 @@ class SwaggerRequest implements RequestInterface {
 	 *    the message, this method MUST return an empty string.
 	 */
 	public function getHeaderLine($name){
-		// TODO: Implement getHeaderLine() method.
+		return implode(',', $this->headers[$name] ?: []);
 	}
 
 	/**
@@ -140,7 +142,18 @@ class SwaggerRequest implements RequestInterface {
 	 * @throws \InvalidArgumentException for invalid header names or values.
 	 */
 	public function withHeader($name, $value){
-		$this->notImplemented();
+		$cloned = clone $this;
+		$cloned->setHeader($name, $value);
+
+		return $cloned;
+	}
+
+	private function setHeader($name, $value){
+		if (!is_array($value)){
+			$value = [$value];
+		}
+
+		$this->headers[$name] = $value;
 	}
 
 	/**
@@ -160,7 +173,21 @@ class SwaggerRequest implements RequestInterface {
 	 * @throws \InvalidArgumentException for invalid header names or values.
 	 */
 	public function withAddedHeader($name, $value){
-		$this->notImplemented();
+		$cloned = clone $this;
+		$cloned->addHeader($name, $value);
+
+		return $cloned;
+	}
+
+	private function addHeader($name, $value){
+		if (!is_array($value)){
+			$value = [$value];
+		}
+		if (!is_array($this->headers[$name])){
+			$this->headers[$name] = [];
+		}
+
+		$this->headers[$name] = array_merge($this->headers[$name], $value);
 	}
 
 	/**
@@ -176,7 +203,7 @@ class SwaggerRequest implements RequestInterface {
 	 * @return static
 	 */
 	public function withoutHeader($name){
-		$this->notImplemented();
+		return clone $this;
 	}
 
 	/**
@@ -202,7 +229,7 @@ class SwaggerRequest implements RequestInterface {
 	 * @throws \InvalidArgumentException When the body is not valid.
 	 */
 	public function withBody(StreamInterface $body){
-		$this->notImplemented();
+		return clone $this;
 	}
 
 	/**
@@ -243,7 +270,7 @@ class SwaggerRequest implements RequestInterface {
 	 * @return static
 	 */
 	public function withRequestTarget($requestTarget){
-		$this->notImplemented();
+		return clone $this;
 	}
 
 	/**
@@ -271,7 +298,7 @@ class SwaggerRequest implements RequestInterface {
 	 * @throws \InvalidArgumentException for invalid HTTP methods.
 	 */
 	public function withMethod($method){
-		$this->notImplemented();
+		return clone $this;
 	}
 
 	/**
@@ -493,7 +520,7 @@ class SwaggerRequest implements RequestInterface {
 			 * @throws \InvalidArgumentException for invalid or unsupported schemes.
 			 */
 			public function withScheme($scheme){
-				$this->notImplemented();
+				return clone $this;
 			}
 
 			/**
@@ -511,7 +538,7 @@ class SwaggerRequest implements RequestInterface {
 			 * @return static A new instance with the specified user information.
 			 */
 			public function withUserInfo($user, $password = null){
-				$this->notImplemented();
+				return clone $this;
 			}
 
 			/**
@@ -527,7 +554,7 @@ class SwaggerRequest implements RequestInterface {
 			 * @throws \InvalidArgumentException for invalid hostnames.
 			 */
 			public function withHost($host){
-				$this->notImplemented();
+				return clone $this;
 			}
 
 			/**
@@ -548,7 +575,7 @@ class SwaggerRequest implements RequestInterface {
 			 * @throws \InvalidArgumentException for invalid ports.
 			 */
 			public function withPort($port){
-				$this->notImplemented();
+				return clone $this;
 			}
 
 			/**
@@ -574,7 +601,7 @@ class SwaggerRequest implements RequestInterface {
 			 * @throws \InvalidArgumentException for invalid paths.
 			 */
 			public function withPath($path){
-				$this->notImplemented();
+				return clone $this;
 			}
 
 			/**
@@ -593,7 +620,7 @@ class SwaggerRequest implements RequestInterface {
 			 * @throws \InvalidArgumentException for invalid query strings.
 			 */
 			public function withQuery($query){
-				$this->notImplemented();
+				return clone $this;
 			}
 
 			/**
@@ -611,7 +638,7 @@ class SwaggerRequest implements RequestInterface {
 			 * @return static A new instance with the specified fragment.
 			 */
 			public function withFragment($fragment){
-				$this->notImplemented();
+				return clone $this;
 			}
 
 			/**
@@ -638,11 +665,7 @@ class SwaggerRequest implements RequestInterface {
 			 * @return string
 			 */
 			public function __toString(){
-				return $this->getScheme().':'.$this->uri;
-			}
-
-			private function notImplemented(){
-				throw new \Exception("The whole URI interface is not implemented by the Swagger Request");
+				return $this->getScheme().'://'.$this->uri;
 			}
 		};
 	}
@@ -678,10 +701,6 @@ class SwaggerRequest implements RequestInterface {
 	 * @return static
 	 */
 	public function withUri(UriInterface $uri, $preserveHost = false){
-		$this->notImplemented();
-	}
-
-	private function notImplemented(){
-		throw new \Exception("The whole message interface is not implemented by the Swagger Request");
+		return clone $this;
 	}
 }
