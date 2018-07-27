@@ -148,8 +148,8 @@ class GenerateRequests extends ClassGenerator {
 	 */
 	public function dumpParentClass(string $dir){
 		$file = __DIR__.'/SwaggerRequest.php';
-		$namespace = $this->namespaceRequest();
-		$this->dumpParentInternal($dir, $file, $namespace);
+		$dir = $this->dirNamespace($dir, self::NAMESPACE_MODEL);
+		$this->dumpParentInternal($dir, $file, $this->namespaceRequest());
 	}
 
 	/**
