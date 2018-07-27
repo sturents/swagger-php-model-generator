@@ -39,6 +39,8 @@ class GenerateRequests extends ClassGenerator {
 
 				$this->handlePathParams($path_params, $class);
 
+				$this->handle200Response($method_details, $class);
+
 				$this->classes[$class_name] = $class;
 			}
 		}
@@ -148,7 +150,7 @@ class GenerateRequests extends ClassGenerator {
 	 */
 	public function dumpParentClass(string $dir){
 		$file = __DIR__.'/SwaggerRequest.php';
-		$dir = $this->dirNamespace($dir, self::NAMESPACE_MODEL);
+		$dir = $this->dirNamespace($dir, self::NAMESPACE_REQUEST);
 		$this->dumpParentInternal($dir, $file, $this->namespaceRequest());
 	}
 
@@ -171,5 +173,23 @@ class GenerateRequests extends ClassGenerator {
 			->setBody("\$this->body = json_encode(\$$name);")
 			->addParameter($name)
 			->setTypeHint($model_class);
+	}
+
+	/**
+	 * @param array $method_details
+	 * @param ClassType $class
+	 */
+	protected function handle200Response(array $method_details, ClassType $class){
+		$response_200 = $method_details['responses']['200'];
+		if (is_null($response_200)){
+			return;
+		}
+		$model_ns = $this->namespaceModel();
+		$schema = $response_200['schema'];
+		$type = $this->typeFromRef(isset($schema['$ref']) ? $schema : $schema['items']);
+		$class->addConstant('RESPONSE_CLASS', "\\{$model_ns}\\$type");
+		if ($schema['type']==='array'){
+			$class->addProperty('response_is_array', true);
+		}
 	}
 }
