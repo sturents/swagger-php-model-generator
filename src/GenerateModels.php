@@ -140,9 +140,8 @@ class GenerateModels extends ClassGenerator {
 	 * @param string $dir
 	 */
 	public function dumpParentClass(string $dir){
-		$file = __DIR__.'/SwaggerModel.php';
 		$dir = $this->dirNamespace($dir, self::NAMESPACE_MODEL);
-		$this->dumpParentInternal($dir, $file, $this->namespaceModel());
+		$this->dumpParentInternal($dir, __DIR__.'/SwaggerModel.php', $this->namespaceModel());
 	}
 
 	/**

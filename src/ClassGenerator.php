@@ -73,11 +73,14 @@ abstract class ClassGenerator {
 	 * @param string $namespace
 	 * @throws \Exception
 	 */
-	protected function dumpParentInternal(string $dir, string $file, string $namespace){
+	protected function dumpParentInternal(string $dir, string $file, string $namespace, string $namespace_use = ''){
 		$dir = $this->checkDir($dir);
 
 		$content = file_get_contents($file);
 		$content = str_replace("\nnamespace ".__NAMESPACE__.";", "\nnamespace {$namespace};", $content);
+		if ($namespace_use){
+			$content = str_replace("\nuse ".__NAMESPACE__."\\", "\nuse {$namespace_use}\\", $content);
+		}
 		$file_name = basename($file);
 		file_put_contents("$dir/$file_name", $content);
 	}

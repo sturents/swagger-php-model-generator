@@ -149,9 +149,9 @@ class GenerateRequests extends ClassGenerator {
 	 * @param string $dir
 	 */
 	public function dumpParentClass(string $dir){
-		$file = __DIR__.'/SwaggerRequest.php';
 		$dir = $this->dirNamespace($dir, self::NAMESPACE_REQUEST);
-		$this->dumpParentInternal($dir, $file, $this->namespaceRequest());
+		$this->dumpParentInternal($dir, __DIR__.'/SwaggerRequest.php', $this->namespaceRequest());
+		$this->dumpParentInternal($dir, __DIR__.'/SwaggerClient.php', $this->namespaceRequest(), $this->namespaceModel());
 	}
 
 	/**
@@ -186,10 +186,14 @@ class GenerateRequests extends ClassGenerator {
 		}
 		$model_ns = $this->namespaceModel();
 		$schema = $response_200['schema'];
-		$type = $this->typeFromRef(isset($schema['$ref']) ? $schema : $schema['items']);
-		$class->addConstant('RESPONSE_CLASS', "\\{$model_ns}\\$type");
-		if ($schema['type']==='array'){
-			$class->addProperty('response_is_array', true);
-		}
+		$type = $comment_type = $this->typeFromRef(isset($schema['$ref']) ? $schema : $schema['items']);
+		$type = "\\$model_ns\\$type";
+		$comment_type = $type.($schema['type']==='array' ? '[]' : '');
+		$class->addMethod('send')
+			->addBody("return \$client->send(\$this, new $type());")
+			->addComment("@param SwaggerClient \$client")
+			->addComment("@return $comment_type")
+			->addParameter('client')
+			->setTypeHint('SwaggerClient');
 	}
 }
