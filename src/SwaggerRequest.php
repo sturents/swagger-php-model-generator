@@ -380,7 +380,7 @@ class SwaggerRequest implements RequestInterface {
 			private $uri;
 
 			public function __construct($uri){
-				$this->uri = str_replace(['https://', 'http://'], '', $uri);
+				$this->uri = $this->removeScheme($uri);
 			}
 
 			/**
@@ -610,7 +610,25 @@ class SwaggerRequest implements RequestInterface {
 			 * @throws \InvalidArgumentException for invalid hostnames.
 			 */
 			public function withHost($host){
-				return clone $this;
+				$clone = clone $this;
+				$clone->setHost($host);
+
+				return $clone;
+			}
+
+			/**
+			 * @param string $host
+			 */
+			private function setHost($host){
+				$host = $this->removeScheme($host);
+				$current_host = $this->getHost();
+
+				if (!empty($current_host)){
+					$this->uri = str_replace($current_host, $host, $this->uri);
+				}
+				else {
+					$this->uri = $host.$this->uri;
+				}
 			}
 
 			/**
@@ -738,6 +756,14 @@ class SwaggerRequest implements RequestInterface {
 			 */
 			public function __toString(){
 				return $this->getScheme().'://'.$this->uri;
+			}
+
+			/**
+			 * @param string $uri
+			 * @return string
+			 */
+			protected function removeScheme($uri){
+				return str_replace(['https://', 'http://'], '', $uri);
 			}
 		};
 	}
