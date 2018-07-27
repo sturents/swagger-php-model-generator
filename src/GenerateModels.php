@@ -68,7 +68,7 @@ class GenerateModels extends ClassGenerator {
 			/**
 			 * @var Property $property
 			 */
-			$property = $class->addProperty($property_name)->setVisibility('private');
+			$property = $class->addProperty($property_name)->setVisibility('protected');
 			$property->addComment($property_details['description'] ?? "\n");
 
 			if ($type==='array'){

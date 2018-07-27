@@ -317,7 +317,7 @@ class SwaggerRequest implements RequestInterface {
 			$query[] = $this->{$param_name};
 		}
 		if (!empty($query)){
-			$uri .= '?'.http_build_query($query);
+			$uri .= '/'.implode('/', $query);
 		}
 
 		return new class($uri) implements UriInterface {
