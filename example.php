@@ -27,18 +27,12 @@ if (!empty($opt_errors)){
 
 echo "Generating models under namespace '{$options['namespace']}' from the YAML file at '{$options['yaml-path']}', will save to {$options['dir']}\n";
 
-$generator = new GenerateModels("{$options['namespace']}");
-$generator->generate($options['yaml-path']);
+$generate_models = new GenerateModels("{$options['namespace']}");
+$saved = $generate_models->runFull($options['yaml-path'], $options['dir']);
+echo "Saved ".$saved." request classes\n";
 
-$generator->saveClasses($options['dir']);
-$generator->dumpParentClass($options['dir']);
-echo "Saved ".count($generator->classes)." request classes\n";
-
-$generator = new GenerateRequests("{$options['namespace']}", $options['uri']);
-$generator->generate($options['yaml-path']);
-
-$generator->saveClasses($options['dir']);
-$generator->dumpParentClass($options['dir']);
-echo "Saved ".count($generator->classes)." request classes\n";
+$generate_requests = new GenerateRequests("{$options['namespace']}", $options['uri']);
+$saved = $generate_requests->runFull($options['yaml-path'], $options['dir']);
+echo "Saved ".$saved." request classes\n";
 
 echo "Done\n";

@@ -12,9 +12,11 @@ Run with:
 
 ```php
 
-$generator = new SwaggerGen\GenerateModels('MyNamespace');
-$generator->generate('/path/to/api.yaml');
-$generator->saveClasses('/path/to/generate/models/');
+$generate_models = new SwaggerGen\GenerateModels('MyNamespace');
+$generate_models->runFull('/path/to/api.yaml', '/path/to/library/src/');
+
+$generate_requests = new SwaggerGen\GenerateRequests('MyNamespace', 'https://my-website.com/api/');
+$generate_requests->runFull('/path/to/api.yaml', '/path/to/library/src/');
 ```
 
 Or run simply from this repo using:

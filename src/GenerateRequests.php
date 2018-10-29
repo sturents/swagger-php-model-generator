@@ -184,7 +184,7 @@ class GenerateRequests extends ClassGenerator {
 		$response_models = [];
 
 		$model_ns = $this->namespaceModel();
-		$has_default = $has_2xx = false;
+		$has_2xx = false;
 		foreach ($method_details['responses'] as $code_string => $method){
 			$get_type_from = isset($method['$ref']) ? $method : $method['schema'];
 			if (!is_null($get_type_from)){

@@ -41,6 +41,21 @@ abstract class ClassGenerator {
 	}
 
 	abstract public function saveClasses(string $dir);
+	abstract public function generate(string $file_path);
+
+	/**
+	 * @param string $yaml_path
+	 * @param string $dir
+	 * @return int
+	 */
+	public function runFull(string $yaml_path, string $dir){
+		$this->generate($yaml_path);
+
+		$this->saveClasses($dir);
+		$this->dumpParentClass($dir);
+
+		return count($this->classes);
+	}
 
 	/**
 	 * Saves generated classes down as PHP files
