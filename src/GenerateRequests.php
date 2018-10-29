@@ -40,7 +40,7 @@ class GenerateRequests extends ClassGenerator {
 
 				$this->handlePathParams($path_params, $class);
 
-				$this->handleGoodResponse($method_details, $class);
+				$this->handleResponse($method_details, $class);
 
 				$this->classes[$class_name] = $class;
 			}
@@ -181,7 +181,7 @@ class GenerateRequests extends ClassGenerator {
 	 * @param ClassType $class
 	 * @throws \Exception
 	 */
-	protected function handleGoodResponse(array $method_details, ClassType $class){
+	protected function handleResponse(array $method_details, ClassType $class){
 		$response_models = [];
 
 		$model_ns = $this->namespaceModel();

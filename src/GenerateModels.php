@@ -108,8 +108,8 @@ class GenerateModels extends ClassGenerator {
 			}
 
 			if ($sub_type){
-				$property_name_singular = $this->stringNotEndWith($property_name, 's');
-				$capital_case_singular = $this->stringNotEndWith($capital_case, 's');
+				$property_name_singular = $this->unPlural($property_name);
+				$capital_case_singular = $this->unPlural($capital_case);
 				/**
 				 * @var Method $add_to
 				 */

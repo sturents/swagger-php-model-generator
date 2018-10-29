@@ -41,6 +41,7 @@ abstract class ClassGenerator {
 	}
 
 	abstract public function saveClasses(string $dir);
+
 	abstract public function generate(string $file_path);
 
 	/**
@@ -109,6 +110,21 @@ abstract class ClassGenerator {
 	 */
 	protected function stringNotEndWith(string $string, string $char){
 		return $string[strlen($string)-1]===$char ? substr($string, 0, -1) : $string;
+	}
+
+	/**
+	 * @param string $string
+	 * @return string
+	 */
+	protected function unPlural(string $string){
+		if (substr($string, -3)==='ies'){
+			return substr($string, 0, -3).'y';
+		}
+		if (substr($string, -1)==='s'){
+			return substr($string, 0, -1);
+		}
+
+		return $string;
 	}
 
 	/**
