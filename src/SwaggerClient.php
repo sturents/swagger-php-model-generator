@@ -7,8 +7,8 @@ interface SwaggerClient {
 
 	/**
 	 * @param SwaggerRequest $request
-	 * @param SwaggerModel $response_model
+	 * @param string[] $response_models
 	 * @return SwaggerModel
 	 */
-	public function send(SwaggerRequest $request, SwaggerModel $response_model);
+	public function send(SwaggerRequest $request, array $response_models);
 }

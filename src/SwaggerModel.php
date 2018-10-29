@@ -7,6 +7,8 @@ use JsonSerializable;
 class SwaggerModel implements JsonSerializable {
 	const DATE_FORMAT = 'Y-m-d H:i:s';
 
+	private $is_error = false;
+
 	/**
 	 * @return array
 	 */
@@ -66,5 +68,16 @@ class SwaggerModel implements JsonSerializable {
 		}
 
 		return $data;
+	}
+
+	/**
+	 * @return bool
+	 */
+	public function isError(){
+		return $this->is_error;
+	}
+
+	public function asError(){
+		$this->is_error = true;
 	}
 }

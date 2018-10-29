@@ -39,7 +39,7 @@ class GenerateRequests extends ClassGenerator {
 
 				$this->handlePathParams($path_params, $class);
 
-				$this->handle200Response($method_details, $class);
+				$this->handleGoodResponse($method_details, $class);
 
 				$this->classes[$class_name] = $class;
 			}
@@ -178,21 +178,41 @@ class GenerateRequests extends ClassGenerator {
 	/**
 	 * @param array $method_details
 	 * @param ClassType $class
+	 * @throws \Exception
 	 */
-	protected function handle200Response(array $method_details, ClassType $class){
-		$response_200 = $method_details['responses']['200'];
-		if (is_null($response_200)){
-			return;
-		}
+	protected function handleGoodResponse(array $method_details, ClassType $class){
+		$response_models = [];
+
 		$model_ns = $this->namespaceModel();
-		$schema = $response_200['schema'];
-		$type = $comment_type = $this->typeFromRef(isset($schema['$ref']) ? $schema : $schema['items']);
-		$type = "\\$model_ns\\$type";
-		$comment_type = $type.($schema['type']==='array' ? '[]' : '');
+		$has_default = $has_2xx = false;
+		foreach ($method_details['responses'] as $code_string => $method){
+			$get_type_from = isset($method['$ref']) ? $method : $method['schema'];
+			if (!is_null($get_type_from)){
+				$type = $comment_type = $this->typeFromRef($get_type_from);
+				$type = "\\$model_ns\\$type";
+			}
+			else {
+				$type = '';
+			}
+
+			$type = str_replace("\\", "\\\\", $type);
+			$response_models[] = "'$code_string' => '$type'";
+
+			if ((int)$code_string>0 && (int)$code_string<400) {
+				$has_2xx = true;
+			}
+		}
+
+		if (!$has_2xx){
+			throw new \Exception("Response blocks must contain at least one positive response type");
+		}
+
+		$response_models = implode(",\n\t", $response_models);
+		$response_models = "[\n\t$response_models\n]";
 		$class->addMethod('send')
-			->addBody("return \$client->send(\$this, new $type());")
+			->addBody("return \$client->send(\$this, $response_models);")
 			->addComment("@param SwaggerClient \$client")
-			->addComment("@return $comment_type")
+			->addComment("@return string[]")
 			->addParameter('client')
 			->setTypeHint('SwaggerClient');
 	}
