@@ -14,7 +14,8 @@ class GenerateRequests extends ClassGenerator {
 	 */
 	public function __construct(string $namespace_name, string $base_uri){
 		parent::__construct($namespace_name);
-		$this->base_uri = $base_uri;
+
+		$this->base_uri = $this->stringNotEndWith($base_uri, '/');
 	}
 
 	/**
