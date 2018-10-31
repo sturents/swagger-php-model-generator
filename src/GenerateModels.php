@@ -85,6 +85,9 @@ class GenerateModels extends ClassGenerator {
 				$comment_type = $type;
 				$sub_type = $sub_typehint = '';
 			}
+			if ($comment_type==='number'){
+				$comment_type = 'float';
+			}
 
 			$property->addComment("@var $comment_type");
 
