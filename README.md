@@ -12,11 +12,8 @@ Run with:
 
 ```php
 
-$generate_models = new SwaggerGen\GenerateModels('MyNamespace');
-$generate_models->runFull('/path/to/api.yaml', '/path/to/library/src/');
-
-$generate_requests = new SwaggerGen\GenerateRequests('MyNamespace', 'https://my-website.com/api/');
-$generate_requests->runFull('/path/to/api.yaml', '/path/to/library/src/');
+$generator = new SwaggerGen\GenerateAll('MyNamespace', '/path/to/api.yaml', '/path/to/library/src/');
+echo $generator->saved_models.' - '.$generator->saved_requests;
 ```
 
 Or run simply from this repo using:

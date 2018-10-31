@@ -5,24 +5,13 @@ use Nette\PhpGenerator\ClassType;
 use Symfony\Component\Yaml\Yaml;
 
 class GenerateRequests extends ClassGenerator {
-	private $base_uri;
-
-	/**
-	 * GenerateRequests constructor.
-	 * @param string $namespace_name
-	 * @param string $base_uri
-	 */
-	public function __construct(string $namespace_name, string $base_uri){
-		parent::__construct($namespace_name);
-
-		$this->base_uri = $this->stringNotEndWith($base_uri, '/');
-	}
 
 	/**
 	 * @param string $file_path
 	 */
 	public function generate(string $file_path){
 		$api = Yaml::parseFile($file_path);
+		$base_uri = $this->stringNotEndWith($api['basePath'], '/');
 
 		foreach ($api['paths'] as $path => $path_details){
 			$path_no_params = $this->pathNoParams($path);
@@ -33,7 +22,7 @@ class GenerateRequests extends ClassGenerator {
 				$class = new ClassType($class_name);
 				$class->setExtends(self::REQUEST_CLASS_NAME);
 				$class->addComment($method_details['summary']);
-				$class->addConstant('URI', "{$this->base_uri}/{$path_no_params}");
+				$class->addConstant('URI', "{$base_uri}/{$path_no_params}");
 				$class->addConstant('METHOD', strtoupper($method));
 
 				$path_params = $this->handleParams($method_details, $class);

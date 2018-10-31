@@ -2,14 +2,12 @@
 
 require __DIR__.'/vendor/autoload.php';
 
-use SwaggerGen\GenerateModels;
-use SwaggerGen\GenerateRequests;
+use SwaggerGen\GenerateAll;
 
 $opt_fields  = [
 	"yaml-path",
 	"namespace",
 	"dir",
-	"uri",
 ];
 $options = getopt("", array_map(function($option){
 	return "{$option}:";
@@ -27,12 +25,9 @@ if (!empty($opt_errors)){
 
 echo "Generating models under namespace '{$options['namespace']}' from the YAML file at '{$options['yaml-path']}', will save to {$options['dir']}\n";
 
-$generate_models = new GenerateModels("{$options['namespace']}");
-$saved = $generate_models->runFull($options['yaml-path'], $options['dir']);
-echo "Saved ".$saved." request classes\n";
+$generator = new GenerateAll($options['namespace'], $options['yaml-path'], $options['dir']);
 
-$generate_requests = new GenerateRequests("{$options['namespace']}", $options['uri']);
-$saved = $generate_requests->runFull($options['yaml-path'], $options['dir']);
-echo "Saved ".$saved." request classes\n";
+echo "Saved ".$generator->saved_models." model classes\n";
+echo "Saved ".$generator->saved_requests." request classes\n";
 
 echo "Done\n";
