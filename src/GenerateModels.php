@@ -143,12 +143,4 @@ class GenerateModels extends ClassGenerator {
 		$dir = $this->dirNamespace($dir, self::NAMESPACE_MODEL);
 		$this->dumpParentInternal($dir, __DIR__.'/SwaggerModel.php', $this->namespaceModel());
 	}
-
-	/**
-	 * @param $type
-	 * @return bool
-	 */
-	private function notScalarType($type){
-		return !in_array($type, ['integer', 'string', 'boolean', 'number']);
-	}
 }

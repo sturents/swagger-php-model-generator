@@ -167,4 +167,12 @@ abstract class ClassGenerator {
 
 		return $dir;
 	}
+
+	/**
+	 * @param $type
+	 * @return bool
+	 */
+	protected function notScalarType($type){
+		return !in_array($type, ['integer', 'string', 'boolean', 'number']);
+	}
 }

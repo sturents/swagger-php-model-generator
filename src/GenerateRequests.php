@@ -178,8 +178,18 @@ class GenerateRequests extends ClassGenerator {
 		foreach ($method_details['responses'] as $code_string => $method){
 			$get_type_from = isset($method['$ref']) ? $method : $method['schema'];
 			if (!is_null($get_type_from)){
-				$type = $comment_type = $this->typeFromRef($get_type_from);
-				$type = "\\$model_ns\\$type";
+				if ($get_type_from['type']==='array'){
+					$type = $this->typeFromRef($get_type_from['items']);
+				}
+				else {
+					$type = $this->typeFromRef($get_type_from);
+				}
+				if ($this->notScalarType($type)){
+					$type = "\\$model_ns\\$type";
+				}
+				else {
+					$type = '';
+				}
 			}
 			else {
 				$type = '';
