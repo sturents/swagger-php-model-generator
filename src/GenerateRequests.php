@@ -25,9 +25,7 @@ class GenerateRequests extends ClassGenerator {
 				$class->addConstant('URI', "{$base_uri}/{$path_no_params}");
 				$class->addConstant('METHOD', strtoupper($method));
 
-				$path_params = $this->handleParams($method_details, $class);
-
-				$this->handlePathParams($path_params, $class);
+				$this->handleParams($method_details, $class);
 
 				$this->handleResponse($method_details, $class);
 
@@ -96,7 +94,37 @@ class GenerateRequests extends ClassGenerator {
 		}
 
 		if (!empty($param_names)){
-			$class->addProperty('param_names')
+			$class->addProperty('path_params')
+				->setStatic(true)
+				->setValue($param_names)
+				->setVisibility('protected');
+		}
+	}
+
+	/**
+	 * @param $query_params
+	 * @param $class
+	 */
+	private function handleQueryParams(array $query_params, ClassType $class){
+		if (empty($query_params)){
+			return;
+		}
+
+		$constructor = $class->addMethod('__construct');
+		$param_names = [];
+		foreach ($query_params as $query_param){
+			$param_name = $query_param['name'];
+			$param_names[] = $param_name;
+			$constructor->addParameter($param_name);
+			$class->addProperty($param_name)
+				->addComment($query_param['description'])
+				->addComment('')
+				->addComment("@var {$query_param['type']}");
+			$constructor->addBody("\$this->$param_name = \$$param_name;");
+		}
+
+		if (!empty($param_names)){
+			$class->addProperty('query_params')
 				->setStatic(true)
 				->setValue($param_names)
 				->setVisibility('protected');
@@ -111,11 +139,14 @@ class GenerateRequests extends ClassGenerator {
 	 */
 	protected function handleParams(array $method_details, ClassType $class){
 		$parameters = $method_details['parameters'] ?: [];
-		$path_params = [];
+		$path_params = $query_params = [];
 		foreach ($parameters as $parameter){
 			switch ($parameter['in']){
 				case 'path':
 					$path_params[] = $parameter;
+				break;
+				case 'query':
+					$query_params[] = $parameter;
 				break;
 				case 'body':
 					$this->handleBodyParam($parameter, $class);
@@ -123,7 +154,8 @@ class GenerateRequests extends ClassGenerator {
 			}
 		}
 
-		return $path_params;
+		$this->handlePathParams($path_params, $class);
+		$this->handleQueryParams($query_params, $class);
 	}
 
 	/**
@@ -209,8 +241,8 @@ class GenerateRequests extends ClassGenerator {
 
 		$response_models = implode(",\n\t", $response_models);
 		$response_models = "[\n\t$response_models\n]";
-		$class->addMethod('send')
-			->addBody("return \$client->send(\$this, $response_models);")
+		$class->addMethod('sendWith')
+			->addBody("return \$client->make(\$this, $response_models);")
 			->addComment("@param SwaggerClient \$client")
 			->addComment("@return string[]")
 			->addParameter('client')

@@ -13,7 +13,8 @@ class SwaggerRequest implements RequestInterface {
 
 	protected $body;
 
-	protected static $param_names = [];
+	protected static $path_params = [];
+	protected static $query_params = [];
 
 	protected $headers = [];
 	/**
@@ -369,10 +370,11 @@ class SwaggerRequest implements RequestInterface {
 	private function makeUri(){
 		$uri = static::URI;
 		$query = [];
-		foreach (static::$param_names as $param_name){
+		foreach (static::$path_params as $param_name){
 			$query[] = $this->{$param_name};
 		}
 		if (!empty($query)){
+			/** @noinspection PhpUnusedLocalVariableInspection */
 			$uri .= '/'.implode('/', $query);
 		}
 
@@ -768,7 +770,24 @@ class SwaggerRequest implements RequestInterface {
 		};
 	}
 
+	/**
+	 * @return string
+	 */
 	public function getResponseClass(){
 		return static::RESPONSE_CLASS;
+	}
+
+	/**
+	 * @return array
+	 */
+	public function getQuery(){
+		$query = [];
+		foreach (static::$query_params as $param_name){
+			if (!is_null($this->{$param_name})){
+				$query[$param_name] = $this->{$param_name};
+			}
+		}
+
+		return $query;
 	}
 }

@@ -10,5 +10,5 @@ interface SwaggerClient {
 	 * @param string[] $response_models
 	 * @return SwaggerModel
 	 */
-	public function send(SwaggerRequest $request, array $response_models);
+	public function make(SwaggerRequest $request, array $response_models);
 }
