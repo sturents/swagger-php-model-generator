@@ -85,7 +85,12 @@ class GenerateRequests extends ClassGenerator {
 		foreach ($path_params as $path_param){
 			$param_name = $path_param['name'];
 			$param_names[] = $param_name;
-			$constructor->addParameter($param_name);
+			if ($path_param['required']){
+				$constructor->addParameter($param_name);
+			}
+			else {
+				$constructor->addParameter($param_name, null);
+			}
 			$class->addProperty($param_name)
 				->addComment($path_param['description'])
 				->addComment('')
@@ -115,7 +120,12 @@ class GenerateRequests extends ClassGenerator {
 		foreach ($query_params as $query_param){
 			$param_name = $query_param['name'];
 			$param_names[] = $param_name;
-			$constructor->addParameter($param_name);
+			if ($query_param['required']){
+				$constructor->addParameter($param_name);
+			}
+			else {
+				$constructor->addParameter($param_name, null);
+			}
 			$class->addProperty($param_name)
 				->addComment($query_param['description'])
 				->addComment('')
