@@ -63,9 +63,10 @@ abstract class ClassGenerator {
 	 *
 	 * @param string $dir
 	 * @param string $namespace_name
+	 * @param string $use
 	 * @throws \Exception
 	 */
-	protected function saveClassesInternal(string $dir, $namespace_name){
+	protected function saveClassesInternal(string $dir, string $namespace_name, string $use = ''){
 		if (empty($this->classes)){
 			throw new \Exception("No classes were created, try running the generate() method first");
 		}
@@ -73,10 +74,8 @@ abstract class ClassGenerator {
 		$dir = $this->checkDir($dir);
 
 		foreach ($this->classes as $class_name => $class){
-			$use = '';
-
 			$php_file = (string)$class;
-			$php_file = "<?php\nnamespace $namespace_name;\n$use\n$php_file\n";
+			$php_file = "<?php\nnamespace $namespace_name;\n$use\n$php_file";
 			file_put_contents("{$dir}/{$class_name}.php", $php_file);
 		}
 	}

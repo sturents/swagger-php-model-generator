@@ -164,7 +164,8 @@ class GenerateRequests extends ClassGenerator {
 	 */
 	public function saveClasses(string $dir){
 		$dir = $this->dirNamespace($dir, self::NAMESPACE_REQUEST);
-		$this->saveClassesInternal($dir, $this->namespaceRequest());
+		$use = "use SwaggerGen\\SwaggerModel;\n";
+		$this->saveClassesInternal($dir, $this->namespaceRequest(), $use);
 	}
 
 	/**
