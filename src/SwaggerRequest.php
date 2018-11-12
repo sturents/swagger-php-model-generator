@@ -380,9 +380,13 @@ class SwaggerRequest implements RequestInterface {
 
 		return new class($uri) implements UriInterface {
 			private $uri;
+			private $scheme;
 
 			public function __construct($uri){
 				$this->uri = $this->removeScheme($uri);
+
+				$scheme = strpos($uri, 'http://')===0 ? 'http' : 'https';
+				$this->scheme = $scheme;
 			}
 
 			/**
@@ -400,7 +404,7 @@ class SwaggerRequest implements RequestInterface {
 			 * @return string The URI scheme.
 			 */
 			public function getScheme(){
-				return 'https';
+				return $this->scheme;
 			}
 
 			/**

@@ -244,7 +244,7 @@ class GenerateRequests extends ClassGenerator {
 		$class->addMethod('sendWith')
 			->addBody("return \$client->make(\$this, $response_models);")
 			->addComment("@param SwaggerClient \$client")
-			->addComment("@return string[]")
+			->addComment("@return SwaggerModel")
 			->addParameter('client')
 			->setTypeHint('SwaggerClient');
 	}
