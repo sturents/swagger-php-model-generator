@@ -383,10 +383,7 @@ class SwaggerRequest implements RequestInterface {
 			private $scheme;
 
 			public function __construct($uri){
-				$this->uri = $this->removeScheme($uri);
-
-				$scheme = strpos($uri, 'http://')===0 ? 'http' : 'https';
-				$this->scheme = $scheme;
+				$this->uri = $this->handleScheme($uri);
 			}
 
 			/**
@@ -626,7 +623,7 @@ class SwaggerRequest implements RequestInterface {
 			 * @param string $host
 			 */
 			private function setHost($host){
-				$host = $this->removeScheme($host);
+				$host = $this->handleScheme($host);
 				$current_host = $this->getHost();
 
 				if (!empty($current_host)){
@@ -768,7 +765,10 @@ class SwaggerRequest implements RequestInterface {
 			 * @param string $uri
 			 * @return string
 			 */
-			protected function removeScheme($uri){
+			protected function handleScheme($uri){
+				$scheme = strpos($uri, 'http://')===0 ? 'http' : 'https';
+				$this->scheme = $scheme;
+
 				return str_replace(['https://', 'http://'], '', $uri);
 			}
 		};
