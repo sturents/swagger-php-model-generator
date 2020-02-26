@@ -371,7 +371,13 @@ class SwaggerRequest implements RequestInterface {
 		$uri = static::URI;
 		$query = [];
 		foreach (static::$path_params as $param_name){
-			$query[] = $this->{$param_name};
+			$path_param_pattern = "{{$param_name}}";
+			if(strpos($uri, $path_param_pattern)) {
+				$uri = str_replace($path_param_pattern, $this->{$param_name}, $uri);
+			}
+			else {
+				$query[] = $this->{$param_name};
+			}
 		}
 		if (!empty($query)){
 			/** @noinspection PhpUnusedLocalVariableInspection */
