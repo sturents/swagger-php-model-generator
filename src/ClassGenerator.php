@@ -1,8 +1,6 @@
 <?php
 
-
 namespace SwaggerGen;
-
 
 use Nette\PhpGenerator\ClassType;
 
@@ -59,11 +57,27 @@ abstract class ClassGenerator {
 	}
 
 	/**
+	 * @param string $yaml_path
+	 * @param string $dir
+	 *
+	 * @return int
+	 */
+	public function runFullWithMoreSpecificity(string $yaml_path, string $dir){
+		$this->generate($yaml_path, true);
+
+		$this->saveClasses($dir);
+		$this->dumpParentClass($dir);
+
+		return count($this->classes);
+	}
+
+	/**
 	 * Saves generated classes down as PHP files
 	 *
 	 * @param string $dir
 	 * @param string $namespace_name
 	 * @param string $use
+	 *
 	 * @throws \Exception
 	 */
 	protected function saveClassesInternal(string $dir, string $namespace_name, string $use = ''){
@@ -86,6 +100,7 @@ abstract class ClassGenerator {
 	 * @param string $dir
 	 * @param string $file
 	 * @param string $namespace
+	 *
 	 * @throws \Exception
 	 */
 	protected function dumpParentInternal(string $dir, string $file, string $namespace, string $namespace_use = ''){

@@ -8,6 +8,7 @@ $opt_fields  = [
 	"yaml-path",
 	"namespace",
 	"dir",
+	"more-specificity",
 ];
 $options = getopt("", array_map(function($option){
 	return "{$option}:";
@@ -25,7 +26,7 @@ if (!empty($opt_errors)){
 
 echo "Generating models under namespace '{$options['namespace']}' from the YAML file at '{$options['yaml-path']}', will save to {$options['dir']}\n";
 
-$generator = new GenerateAll($options['namespace'], $options['yaml-path'], $options['dir']);
+$generator = new GenerateAll($options['namespace'], $options['yaml-path'], $options['dir'], $options['more-specificity']==='true');
 
 echo "Saved ".$generator->saved_models." model classes\n";
 echo "Saved ".$generator->saved_requests." request classes\n";

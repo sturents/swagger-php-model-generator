@@ -1,4 +1,5 @@
 <?php
+
 namespace SwaggerGen;
 
 use Psr\Http\Message\RequestInterface;
@@ -382,6 +383,18 @@ class SwaggerRequest implements RequestInterface {
 		if (!empty($query)){
 			/** @noinspection PhpUnusedLocalVariableInspection */
 			$uri .= '/'.implode('/', $query);
+		}
+
+		if (!empty(static::$query_params)){
+			$query_params = [];
+			foreach (static::$query_params as $param){
+				if (!empty($this->{$param})){
+					$query_params[$param] = $this->{$param};
+				}
+			}
+			if (!empty($query_params)){
+				$uri .= '?'.http_build_query($query_params);
+			}
 		}
 
 		return new class($uri) implements UriInterface {

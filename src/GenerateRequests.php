@@ -1,6 +1,9 @@
 <?php
+
 namespace SwaggerGen;
 
+use Exception;
+use Nette\InvalidArgumentException;
 use Nette\PhpGenerator\ClassType;
 use Symfony\Component\Yaml\Yaml;
 
@@ -8,21 +11,28 @@ class GenerateRequests extends ClassGenerator {
 
 	/**
 	 * @param string $file_path
+	 * @param bool   $more_specificity
+	 *
+	 * @throws \Exception
 	 */
-	public function generate(string $file_path){
+	public function generate(string $file_path, bool $more_specificity = false){
 		$api = Yaml::parseFile($file_path);
 		$base_uri = $this->stringNotEndWith($api['basePath'], '/');
-
 		foreach ($api['paths'] as $path => $path_details){
-			$path_no_params = $this->pathNoParams($path);
-			$path_camel = $this->pathToCamelCase($path_no_params);
+			if ($more_specificity){
+				$adapted_path = $this->pathWithParamsNoPlaceholders($path);
+			}
+			else {
+				$adapted_path = $this->pathNoParams($path);
+			}
+			$path_camel = $this->pathToCamelCase($adapted_path);
 			foreach ($path_details as $method => $method_details){
-
 				$class_name = ucfirst($method).$path_camel;
 				$class = new ClassType($class_name);
 				$class->setExtends(self::REQUEST_CLASS_NAME);
 				$class->addComment($method_details['summary']);
-				$class->addConstant('URI', "{$base_uri}/{$path_no_params}");
+				$uri = empty($base_uri) ? $path : "{$base_uri}/{$path}";
+				$class->addConstant('URI', $uri);
 				$class->addConstant('METHOD', strtoupper($method));
 
 				$this->handleParams($method_details, $class);
@@ -53,7 +63,7 @@ class GenerateRequests extends ClassGenerator {
 
 	/**
 	 * @param string $path
-	 * @return array
+	 * @return string
 	 */
 	private function pathNoParams(string $path){
 		$path = substr($path, 1);
@@ -67,6 +77,26 @@ class GenerateRequests extends ClassGenerator {
 			$path_no_params[] = $item;
 		}
 		$path = implode('/', $path_no_params);
+
+		return $path;
+	}
+
+	/**
+	 * @param string $path
+	 *
+	 * @return string
+	 */
+	private function pathWithParamsNoPlaceholders(string $path){
+		$path = substr($path, 1);
+
+		$path = explode('/', $path);
+		$path_with_params = [];
+		foreach ($path as $item){
+			$item = str_replace('{', '', $item);
+			$item = str_replace('}', '', $item);
+			$path_with_params[] = $item;
+		}
+		$path = implode('/', $path_with_params);
 
 		return $path;
 	}
@@ -115,28 +145,40 @@ class GenerateRequests extends ClassGenerator {
 			return;
 		}
 
-		$constructor = $class->addMethod('__construct');
 		$param_names = [];
 		foreach ($query_params as $query_param){
 			$param_name = $query_param['name'];
 			$param_names[] = $param_name;
+
 			if ($query_param['required']){
-				$constructor->addParameter($param_name);
+				$method = $class->getMethod('__construct');
 			}
 			else {
-				$constructor->addParameter($param_name, null);
+				$method = $class->addMethod('set'.$this->pathToCamelCase($query_param['name']));
 			}
+
+			$method->addParameter($param_name);
 			$class->addProperty($param_name)
 				->addComment($query_param['description'])
 				->addComment('')
 				->addComment("@var {$query_param['type']}");
-			$constructor->addBody("\$this->$param_name = \$$param_name;");
+			$method->addBody("\$this->$param_name = \$$param_name;");
 		}
 
 		if (!empty($param_names)){
-			$class->addProperty('query_params')
-				->setStatic(true)
-				->setValue($param_names)
+			try {
+				$query_params_property = $class->getProperty('query_params');
+				$query_params_array = $query_params_property->getValue();
+			}
+			catch (InvalidArgumentException $e){
+				$query_params_property = $class->addProperty('query_params')
+					->setStatic(true)
+					->setVisibility('protected');
+				$query_params_array = [];
+			}
+			$value = array_merge($query_params_array, $param_names);
+			$query_params_property->setStatic(true)
+				->setValue($value)
 				->setVisibility('protected');
 		}
 	}
