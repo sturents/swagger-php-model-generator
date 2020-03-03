@@ -244,17 +244,16 @@ class GenerateRequests extends ClassGenerator {
 					$type = $this->typeFromRef($get_type_from);
 				}
 				if ($this->notScalarType($type)){
-					$type = "\\$model_ns\\$type";
+					$type = "\\$model_ns\\$type::class";
 				}
 				else {
-					$type = '';
+					$type = "''";
 				}
 			}
 			else {
-				$type = '';
+				$type = "''";
 			}
 
-			$type = str_replace("\\", "\\\\", $type);
 			$response_models[] = "'$code_string' => '$type'";
 
 			if ((int)$code_string>0 && (int)$code_string<400){
