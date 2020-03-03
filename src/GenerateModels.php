@@ -15,7 +15,6 @@ class GenerateModels extends ClassGenerator {
 	 * Generates classes in the "classes" field
 	 *
 	 * @param string $file_path
-	 * @throws Exception
 	 */
 	public function generate(string $file_path) :void{
 		$namespace_name = $this->namespaceModel();
@@ -34,6 +33,7 @@ class GenerateModels extends ClassGenerator {
 				$class->addComment("\n".$class_details['description']);
 			}
 
+			$required = $properties = null;
 			if (isset($class_details['allOf'])){
 				$parent_class_name = $this->typeFromRef($class_details['allOf'][0]);
 				$class->setExtends("$namespace_name\\$parent_class_name");
@@ -45,8 +45,8 @@ class GenerateModels extends ClassGenerator {
 				$properties = $class_details['properties'];
 			}
 
-			$this->classProperties($required, $class, true);
-			$this->classProperties($properties, $class);
+			$this->classProperties($required ?? [], $class, true);
+			$this->classProperties($properties ?? [], $class);
 
 			$this->classes[$class_name] = $class;
 		}
