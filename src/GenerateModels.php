@@ -15,6 +15,7 @@ class GenerateModels extends ClassGenerator {
 	 * Generates classes in the "classes" field
 	 *
 	 * @param string $file_path
+	 * @throws Exception
 	 */
 	public function generate(string $file_path) :void{
 		$namespace_name = $this->namespaceModel();
@@ -33,7 +34,6 @@ class GenerateModels extends ClassGenerator {
 				$class->addComment("\n".$class_details['description']);
 			}
 
-			$required = $properties = null;
 			if (isset($class_details['allOf'])){
 				$parent_class_name = $this->typeFromRef($class_details['allOf'][0]);
 				$class->setExtends("$namespace_name\\$parent_class_name");
@@ -45,8 +45,7 @@ class GenerateModels extends ClassGenerator {
 				$properties = $class_details['properties'];
 			}
 
-			$this->classProperties($required ?? [], $class, true);
-			$this->classProperties($properties ?? [], $class);
+			$this->classProperties($properties, $class, $required);
 
 			$this->classes[$class_name] = $class;
 		}
@@ -55,12 +54,15 @@ class GenerateModels extends ClassGenerator {
 	/**
 	 * @param array $properties
 	 * @param ClassType $class
-	 * @param bool $required
+	 * @param array $required
 	 * @throws Exception
 	 */
-	private function classProperties(array $properties, ClassType $class, bool $required = false): void{
+	private function classProperties(array $properties, ClassType $class, ?array $required): void{
 		$converter = new CamelCaseToSnakeCaseNameConverter;
 		$namespace_name = $this->namespaceModel();
+		if (is_null($required)){
+			$required = [];
+		}
 
 		foreach ($properties as $property_name => $property_details){
 			if (isset($property_details['$ref'])){
@@ -98,11 +100,11 @@ class GenerateModels extends ClassGenerator {
 
 			$property->addComment("@var $comment_type");
 
-			if ($required){
+			if (in_array($property_name, $required, true)){
 				$property->addComment('@required');
 			}
 			else {
-				$this->defaultValue($property, $type);
+				$this->blankValue($property, $type);
 			}
 
 			$capital_case = $converter->denormalize($property_name);#
@@ -167,12 +169,15 @@ class GenerateModels extends ClassGenerator {
 	 * @param string $type
 	 * @throws Exception
 	 */
-	private function defaultValue(Property $property, string $type): void{
-		if ($this->notScalarType($type)){
+	private function blankValue(Property $property, string $type): void{
+		if ($type!=='array' && $this->notScalarType($type)){
 			return;
 		}
 
 		switch ($type){
+			case 'array':
+				$property->setValue([]);
+			break;
 			case 'string':
 				$property->setValue('');
 			break;
