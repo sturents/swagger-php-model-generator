@@ -1,13 +1,16 @@
 <?php
 namespace SwaggerGen;
 
-use Exception;
 use Nette\PhpGenerator\ClassType;
 use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\Property;
+use RuntimeException;
 use Symfony\Component\Serializer\NameConverter\CamelCaseToSnakeCaseNameConverter;
 use Symfony\Component\Yaml\Yaml;
+
+use function is_null;
+use function in_array;
 
 class GenerateModels extends ClassGenerator {
 
@@ -15,7 +18,7 @@ class GenerateModels extends ClassGenerator {
 	 * Generates classes in the "classes" field
 	 *
 	 * @param string $file_path
-	 * @throws Exception
+	 * @throws RuntimeException
 	 */
 	public function generate(string $file_path) :void{
 		$namespace_name = $this->namespaceModel();
@@ -55,7 +58,7 @@ class GenerateModels extends ClassGenerator {
 	 * @param array $properties
 	 * @param ClassType $class
 	 * @param array $required
-	 * @throws Exception
+	 * @throws RuntimeException
 	 */
 	private function classProperties(array $properties, ClassType $class, ?array $required): void{
 		$converter = new CamelCaseToSnakeCaseNameConverter;
@@ -148,7 +151,6 @@ class GenerateModels extends ClassGenerator {
 
 	/**
 	 * @param string $dir
-	 * @throws Exception
 	 */
 	public function saveClasses(string $dir) :void{
 		$dir = $this->dirNamespace($dir, self::NAMESPACE_MODEL);
@@ -157,7 +159,6 @@ class GenerateModels extends ClassGenerator {
 
 	/**
 	 * @param string $dir
-	 * @throws Exception
 	 */
 	public function dumpParentClass(string $dir) :void{
 		$dir = $this->dirNamespace($dir, self::NAMESPACE_MODEL);
@@ -167,7 +168,7 @@ class GenerateModels extends ClassGenerator {
 	/**
 	 * @param Property $property
 	 * @param string $type
-	 * @throws Exception
+	 * @throws RuntimeException
 	 */
 	private function blankValue(Property $property, string $type): void{
 		if ($type!=='array' && $this->notScalarType($type)){
@@ -191,7 +192,7 @@ class GenerateModels extends ClassGenerator {
 				$property->setValue(false);
 			break;
 			default:
-				throw new Exception("The property with name {$property->getName()} and type $type was not recognised to set a default value");
+				throw new RuntimeException("The property with name {$property->getName()} and type $type was not recognised to set a default value");
 		}
 	}
 }

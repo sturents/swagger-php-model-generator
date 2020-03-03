@@ -2,19 +2,26 @@
 
 namespace SwaggerGen;
 
+use InvalidArgumentException;
+use Nette\FileNotFoundException;
 use Nette\PhpGenerator\ClassType;
+use RuntimeException;
 use Symfony\Component\Yaml\Yaml;
-use Exception;
 
 use function explode;
 use function ucfirst;
 use function strtoupper;
+use function strtolower;
+use function str_replace;
+use function implode;
+use function substr;
+use function strpos;
 
 class GenerateRequests extends ClassGenerator {
 
 	/**
 	 * @param string $file_path
-	 * @throws Exception
+	 * @throws InvalidArgumentException
 	 */
 	public function generate(string $file_path): void{
 		$api = Yaml::parseFile($file_path);
@@ -176,7 +183,8 @@ class GenerateRequests extends ClassGenerator {
 
 	/**
 	 * @param string $dir
-	 * @throws Exception
+	 * @throws RuntimeException
+	 * @throws FileNotFoundException
 	 */
 	public function saveClasses(string $dir) :void{
 		$dir = $this->dirNamespace($dir, self::NAMESPACE_REQUEST);
@@ -187,7 +195,7 @@ class GenerateRequests extends ClassGenerator {
 
 	/**
 	 * @param string $dir
-	 * @throws Exception
+	 * @throws FileNotFoundException
 	 */
 	public function dumpParentClass(string $dir) :void{
 		$dir = $this->dirNamespace($dir, self::NAMESPACE_REQUEST);
@@ -219,7 +227,7 @@ class GenerateRequests extends ClassGenerator {
 	/**
 	 * @param array $method_details
 	 * @param ClassType $class
-	 * @throws Exception
+	 * @throws InvalidArgumentException
 	 */
 	protected function handleResponse(array $method_details, ClassType $class): void{
 		$response_models = [];
@@ -255,7 +263,7 @@ class GenerateRequests extends ClassGenerator {
 		}
 
 		if (!$has_2xx){
-			throw new Exception('Response blocks must contain at least one positive response type');
+			throw new InvalidArgumentException('Response blocks must contain at least one positive response type');
 		}
 
 		$response_models = implode(",\n\t", $response_models);
