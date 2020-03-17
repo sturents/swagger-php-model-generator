@@ -70,6 +70,21 @@ abstract class ClassGenerator {
 	}
 
 	/**
+	 * @param string $yaml_path
+	 * @param string $dir
+	 *
+	 * @return int
+	 */
+	public function runFullWithMoreSpecificity(string $yaml_path, string $dir){
+		$this->generate($yaml_path, true);
+
+		$this->saveClasses($dir);
+		$this->dumpParentClass($dir);
+
+		return count($this->classes);
+	}
+
+	/**
 	 * Saves generated classes down as PHP files
 	 *
 	 * @param string $dir
