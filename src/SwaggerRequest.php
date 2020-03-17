@@ -8,9 +8,9 @@ use Psr\Http\Message\UriInterface;
 
 class SwaggerRequest implements RequestInterface {
 
-	const METHOD = '';
-	const URI = '';
-	const RESPONSE_CLASS = '';
+	public const METHOD = '';
+	public const URI = '';
+	public const RESPONSE_CLASS = '';
 
 	protected $body;
 
@@ -364,11 +364,14 @@ class SwaggerRequest implements RequestInterface {
 		return $request;
 	}
 
-	private function setUri(UriInterface $uri){
+	private function setUri(UriInterface $uri): void{
 		$this->uri = $uri;
 	}
 
-	private function makeUri(){
+	/**
+	 * @return UriInterface
+	 */
+	private function makeUri() :UriInterface{
 		$uri = static::URI;
 		$query = [];
 		foreach (static::$path_params as $param_name){
@@ -796,14 +799,14 @@ class SwaggerRequest implements RequestInterface {
 	/**
 	 * @return string
 	 */
-	public function getResponseClass(){
+	public function getResponseClass(): string{
 		return static::RESPONSE_CLASS;
 	}
 
 	/**
 	 * @return array
 	 */
-	public function getQuery(){
+	public function getQuery(): array{
 		$query = [];
 		foreach (static::$query_params as $param_name){
 			if (!is_null($this->{$param_name})){

@@ -5,19 +5,19 @@ use DateTimeInterface;
 use JsonSerializable;
 
 class SwaggerModel implements JsonSerializable {
-	const DATE_FORMAT = 'Y-m-d H:i:s';
+	public const DATE_FORMAT = 'Y-m-d H:i:s';
 
 	private $_is_error = false;
 
 	/**
 	 * @return array
 	 */
-	public function toArray(){
+	public function toArray(): array{
 		$this->preOutput();
 
 		$data = [];
 		foreach (get_object_vars($this) as $key => $val){
-			if ($key[0]==='_'){
+			if (strpos($key, '_')===0){
 				continue;
 			}
 
@@ -32,7 +32,7 @@ class SwaggerModel implements JsonSerializable {
 	/**
 	 * Allows changing the data format before serializing
 	 */
-	protected function preOutput(){
+	protected function preOutput(): void{
 	}
 
 	/**
@@ -47,8 +47,8 @@ class SwaggerModel implements JsonSerializable {
 	 *
 	 * @return array
 	 */
-	private function toArrayData(array $data){
-		foreach ($data as $key => &$val){
+	private function toArrayData(array $data): array{
+		foreach ($data as &$val){
 
 			if (is_object($val)){
 				if ($val instanceof self){
@@ -73,11 +73,11 @@ class SwaggerModel implements JsonSerializable {
 	/**
 	 * @return bool
 	 */
-	public function isError(){
+	public function isError(): bool{
 		return $this->_is_error;
 	}
 
-	public function asError(){
+	public function asError(): void{
 		$this->_is_error = true;
 	}
 }

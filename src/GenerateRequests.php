@@ -2,20 +2,29 @@
 
 namespace SwaggerGen;
 
-use Exception;
 use Nette\InvalidArgumentException;
+use Nette\FileNotFoundException;
 use Nette\PhpGenerator\ClassType;
+use RuntimeException;
 use Symfony\Component\Yaml\Yaml;
+
+use function explode;
+use function ucfirst;
+use function strtoupper;
+use function strtolower;
+use function str_replace;
+use function implode;
+use function substr;
+use function strpos;
 
 class GenerateRequests extends ClassGenerator {
 
 	/**
 	 * @param string $file_path
 	 * @param bool   $more_specificity
-	 *
-	 * @throws \Exception
+	 * @throws InvalidArgumentException
 	 */
-	public function generate(string $file_path, bool $more_specificity = false){
+	public function generate(string $file_path,  bool $more_specificity = false): void{
 		$api = Yaml::parseFile($file_path);
 		$base_uri = $this->stringNotEndWith($api['basePath'], '/');
 		foreach ($api['paths'] as $path => $path_details){
@@ -49,14 +58,15 @@ class GenerateRequests extends ClassGenerator {
 	 *
 	 * @return string
 	 */
-	private function pathToCamelCase(string $path){
+	private function pathToCamelCase(string $path): string{
 		$path = str_replace('/', '-', $path);
 
-		$path = explode('-', $path);
-		foreach ($path as &$item){
+		$path_arr = explode('-', $path);
+		foreach ($path_arr as &$item){
 			$item = ucfirst($item);
 		}
-		$path = implode('', $path);
+		unset($item);
+		$path = implode('', $path_arr);
 
 		return $path;
 	}
@@ -65,12 +75,12 @@ class GenerateRequests extends ClassGenerator {
 	 * @param string $path
 	 * @return string
 	 */
-	private function pathNoParams(string $path){
+	private function pathNoParams(string $path): string{
 		$path = substr($path, 1);
 
-		$path = explode('/', $path);
+		$path_arr = explode('/', $path);
 		$path_no_params = [];
-		foreach ($path as $item){
+		foreach ($path_arr as $item){
 			if (strpos($item, '{')!==false){
 				continue;
 			}
@@ -102,10 +112,10 @@ class GenerateRequests extends ClassGenerator {
 	}
 
 	/**
-	 * @param $path_params
-	 * @param $class
+	 * @param array $path_params
+	 * @param ClassType $class
 	 */
-	private function handlePathParams(array $path_params, ClassType $class){
+	private function handlePathParams(array $path_params, ClassType $class): void{
 		if (empty($path_params)){
 			return;
 		}
@@ -137,10 +147,10 @@ class GenerateRequests extends ClassGenerator {
 	}
 
 	/**
-	 * @param $query_params
-	 * @param $class
+	 * @param array $query_params
+	 * @param ClassType $class
 	 */
-	private function handleQueryParams(array $query_params, ClassType $class){
+	private function handleQueryParams(array $query_params, ClassType $class): void{
 		if (empty($query_params)){
 			return;
 		}
@@ -186,10 +196,8 @@ class GenerateRequests extends ClassGenerator {
 	/**
 	 * @param array $method_details
 	 * @param ClassType $class
-	 *
-	 * @return array
 	 */
-	protected function handleParams(array $method_details, ClassType $class){
+	protected function handleParams(array $method_details, ClassType $class): void{
 		$parameters = $method_details['parameters'] ?: [];
 		$path_params = $query_params = [];
 		foreach ($parameters as $parameter){
@@ -212,9 +220,10 @@ class GenerateRequests extends ClassGenerator {
 
 	/**
 	 * @param string $dir
-	 * @throws \Exception
+	 * @throws RuntimeException
+	 * @throws FileNotFoundException
 	 */
-	public function saveClasses(string $dir){
+	public function saveClasses(string $dir) :void{
 		$dir = $this->dirNamespace($dir, self::NAMESPACE_REQUEST);
 		$use_ns = $this->namespaceModel();
 		$use = "use $use_ns\\SwaggerModel;\n";
@@ -223,8 +232,9 @@ class GenerateRequests extends ClassGenerator {
 
 	/**
 	 * @param string $dir
+	 * @throws FileNotFoundException
 	 */
-	public function dumpParentClass(string $dir){
+	public function dumpParentClass(string $dir) :void{
 		$dir = $this->dirNamespace($dir, self::NAMESPACE_REQUEST);
 		$this->dumpParentInternal($dir, __DIR__.'/SwaggerRequest.php', $this->namespaceRequest());
 		$this->dumpParentInternal($dir, __DIR__.'/SwaggerClient.php', $this->namespaceRequest(), $this->namespaceModel());
@@ -234,7 +244,7 @@ class GenerateRequests extends ClassGenerator {
 	 * @param array $parameter
 	 * @param ClassType $class
 	 */
-	private function handleBodyParam(array $parameter, ClassType $class){
+	private function handleBodyParam(array $parameter, ClassType $class): void{
 		$schema = $parameter['schema'];
 		if (empty($schema)){
 			return;
@@ -254,9 +264,9 @@ class GenerateRequests extends ClassGenerator {
 	/**
 	 * @param array $method_details
 	 * @param ClassType $class
-	 * @throws \Exception
+	 * @throws InvalidArgumentException
 	 */
-	protected function handleResponse(array $method_details, ClassType $class){
+	protected function handleResponse(array $method_details, ClassType $class): void{
 		$response_models = [];
 
 		$model_ns = $this->namespaceModel();
@@ -271,34 +281,33 @@ class GenerateRequests extends ClassGenerator {
 					$type = $this->typeFromRef($get_type_from);
 				}
 				if ($this->notScalarType($type)){
-					$type = "\\$model_ns\\$type";
+					$type = "\\$model_ns\\$type::class";
 				}
 				else {
-					$type = '';
+					$type = "''";
 				}
 			}
 			else {
-				$type = '';
+				$type = "''";
 			}
 
-			$type = str_replace("\\", "\\\\", $type);
 			$response_models[] = "'$code_string' => '$type'";
 
-			if ((int)$code_string>0 && (int)$code_string<400) {
+			if ((int)$code_string>0 && (int)$code_string<400){
 				$has_2xx = true;
 			}
 		}
 
 		if (!$has_2xx){
-			throw new \Exception("Response blocks must contain at least one positive response type");
+			throw new InvalidArgumentException('Response blocks must contain at least one positive response type');
 		}
 
 		$response_models = implode(",\n\t", $response_models);
 		$response_models = "[\n\t$response_models\n]";
 		$class->addMethod('sendWith')
 			->addBody("return \$client->make(\$this, $response_models);")
-			->addComment("@param SwaggerClient \$client")
-			->addComment("@return SwaggerModel")
+			->addComment('@param SwaggerClient $client')
+			->addComment('@return SwaggerModel')
 			->addParameter('client')
 			->setTypeHint('SwaggerClient');
 	}
