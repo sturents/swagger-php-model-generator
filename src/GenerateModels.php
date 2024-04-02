@@ -40,11 +40,11 @@ class GenerateModels extends ClassGenerator {
 			if (isset($class_details['allOf'])){
 				$parent_class_name = $this->typeFromRef($class_details['allOf'][0]);
 				$class->setExtends("$namespace_name\\$parent_class_name");
-				$required = $class_details['allOf'][1]['required'];
+				$required = $class_details['allOf'][1]['required'] ?? null;
 				$properties = $class_details['allOf'][1]['properties'];
 			}
 			else {
-				$required = $class_details['required'];
+				$required = $class_details['required'] ?? null;
 				$properties = $class_details['properties'];
 			}
 
@@ -68,12 +68,14 @@ class GenerateModels extends ClassGenerator {
 		}
 
 		foreach ($properties as $property_name => $property_details){
+            $is_nullable = ($property_details['nullable'] ?? null) === 'true';
+
 			if (isset($property_details['$ref'])){
 				$type = $this->typeFromRef($property_details);
 				$typehint = "$namespace_name\\$type";
 			}
 			else {
-				$type = $property_details['type'];
+				$type = $property_details['type'] ?? 'null';
 				$typehint = $type;
 			}
 
@@ -100,6 +102,9 @@ class GenerateModels extends ClassGenerator {
 			if ($comment_type==='number'){
 				$comment_type = 'float';
 			}
+            if ($is_nullable && $comment_type!=='null'){
+                $comment_type = "?$comment_type";
+            }
 
 			$property->addComment("@var $comment_type");
 
@@ -191,6 +196,9 @@ class GenerateModels extends ClassGenerator {
 			case 'boolean':
 				$property->setValue(false);
 			break;
+            case 'null':
+                $property->setValue(null);
+                break;
 			default:
 				throw new RuntimeException("The property with name {$property->getName()} and type $type was not recognised to set a default value");
 		}

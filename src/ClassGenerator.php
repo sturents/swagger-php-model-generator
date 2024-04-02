@@ -200,6 +200,6 @@ abstract class ClassGenerator {
 	 * @return bool
 	 */
 	protected function notScalarType(string $type): bool{
-		return !in_array($type, ['integer', 'string', 'boolean', 'number']);
+		return !in_array($type, ['integer', 'string', 'boolean', 'number', 'null']);
 	}
 }
