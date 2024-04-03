@@ -131,11 +131,13 @@ class GenerateRequests extends ClassGenerator {
 			else {
 				$constructor->addParameter($param_name, null);
 			}
-            $type = $path_param['type'] ?? 'null';
-            $is_nullable = ($path_param['nullable'] ?? null)==='true';
-            if ($is_nullable && $type!=='null'){
-                $type = "?{$type}";
-            }
+
+			$type = $path_param['type'] ?? 'null';
+			$is_nullable = ($path_param['nullable'] ?? null)===true;
+			if ($is_nullable && $type!=='null'){
+			    $type = "?{$type}";
+			}
+
 			$class->addProperty($param_name)
 				->addComment($path_param['description'])
 				->addComment('')
@@ -173,7 +175,7 @@ class GenerateRequests extends ClassGenerator {
 			}
 
             $type = $path_param['type'] ?? 'null';
-            $is_nullable = ($path_param['nullable'] ?? null)==='true';
+            $is_nullable = ($path_param['nullable'] ?? null)===true;
             if ($is_nullable && $type!=='null'){
                 $type = "?{$type}";
             }

@@ -113,7 +113,7 @@ class GenerateModels extends ClassGenerator {
 			    $comment_type = 'bool';
 			}
 			if ($is_nullable && !empty($comment_type)){
-				$comment_type = "?$comment_type";
+			    $comment_type = "?$comment_type";
 			}
 			if ($is_nullable && !empty($typehint)){
 			    $typehint = "?$typehint";
@@ -216,9 +216,9 @@ class GenerateModels extends ClassGenerator {
 			case 'boolean':
 				$property->setValue(false);
 			break;
-            case 'null':
-                $property->setValue(null);
-                break;
+			case 'null':
+				$property->setValue(null);
+			break;
 			default:
 				throw new RuntimeException("The property with name {$property->getName()} and type $type was not recognised to set a default value");
 		}
