@@ -125,16 +125,23 @@ class GenerateRequests extends ClassGenerator {
 		foreach ($path_params as $path_param){
 			$param_name = $path_param['name'];
 			$param_names[] = $param_name;
-			if ($path_param['required']){
+			if (isset($path_param['required'])){
 				$constructor->addParameter($param_name);
 			}
 			else {
 				$constructor->addParameter($param_name, null);
 			}
+
+			$type = $path_param['type'] ?? 'null';
+			$is_nullable = ($path_param['nullable'] ?? null)===true;
+			if ($is_nullable && $type!=='null'){
+			    $type = "?{$type}";
+			}
+
 			$class->addProperty($param_name)
 				->addComment($path_param['description'])
 				->addComment('')
-				->addComment("@var {$path_param['type']}");
+				->addComment("@var {$type}");
 			$constructor->addBody("\$this->$param_name = \$$param_name;");
 		}
 
@@ -161,17 +168,23 @@ class GenerateRequests extends ClassGenerator {
 			$param_names[] = $param_name;
 
 			if ($query_param['required']){
-				$method = $class->getMethod('__construct');
+				$method = $class->hasMethod('__construct') ? $class->getMethod('__construct') : $class->addMethod('__construct');
 			}
 			else {
 				$method = $class->addMethod('set'.$this->pathToCamelCase($query_param['name']));
 			}
 
+            $type = $path_param['type'] ?? 'null';
+            $is_nullable = ($path_param['nullable'] ?? null)===true;
+            if ($is_nullable && $type!=='null'){
+                $type = "?{$type}";
+            }
+
 			$method->addParameter($param_name);
 			$class->addProperty($param_name)
 				->addComment($query_param['description'])
 				->addComment('')
-				->addComment("@var {$query_param['type']}");
+				->addComment("@var {$type}");
 			$method->addBody("\$this->$param_name = \$$param_name;");
 		}
 
@@ -198,7 +211,7 @@ class GenerateRequests extends ClassGenerator {
 	 * @param ClassType $class
 	 */
 	protected function handleParams(array $method_details, ClassType $class): void{
-		$parameters = $method_details['parameters'] ?: [];
+		$parameters = $method_details['parameters'] ?? [];
 		$path_params = $query_params = [];
 		foreach ($parameters as $parameter){
 			switch ($parameter['in']){
@@ -272,9 +285,9 @@ class GenerateRequests extends ClassGenerator {
 		$model_ns = $this->namespaceModel();
 		$has_2xx = false;
 		foreach ($method_details['responses'] as $code_string => $method){
-			$get_type_from = isset($method['$ref']) ? $method : $method['schema'];
+			$get_type_from = isset($method['$ref']) ? $method : ($method['schema'] ?? null);
 			if (!is_null($get_type_from)){
-				if ($get_type_from['type']==='array'){
+				if (($get_type_from['type'] ?? null)==='array'){
 					$type = $this->typeFromRef($get_type_from['items']);
 				}
 				else {
