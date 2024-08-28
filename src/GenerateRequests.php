@@ -21,12 +21,12 @@ class GenerateRequests extends ClassGenerator {
 
 	/**
 	 * @param string $file_path
-	 * @param bool   $more_specificity
+	 * @param bool $more_specificity
 	 * @throws InvalidArgumentException
 	 */
-	public function generate(string $file_path,  bool $more_specificity = false): void{
+	public function generate(string $file_path, bool $more_specificity = false): void{
 		$api = Yaml::parseFile($file_path);
-		$base_uri = $this->stringNotEndWith($api['basePath'], '/');
+		$base_uri = self::stringNotEndWith($api['basePath'], '/');
 		foreach ($api['paths'] as $path => $path_details){
 			if ($more_specificity){
 				$adapted_path = $this->pathWithParamsNoPlaceholders($path);
@@ -40,9 +40,16 @@ class GenerateRequests extends ClassGenerator {
 				$class = new ClassType($class_name);
 				$class->setExtends(self::REQUEST_CLASS_NAME);
 				$class->addComment($method_details['summary']);
-				$uri = empty($base_uri) ? $path : "{$base_uri}/{$path}";
-				$class->addConstant('URI', $uri);
 				$class->addConstant('METHOD', strtoupper($method));
+
+				if ($base_uri){
+					$path = self::stringNotBeginWith($path, '/');
+					$uri = "{$base_uri}/{$path}";
+				}
+				else {
+					$uri = $path;
+				}
+				$class->addConstant('URI', $uri);
 
 				$this->handleParams($method_details, $class);
 
@@ -53,11 +60,6 @@ class GenerateRequests extends ClassGenerator {
 		}
 	}
 
-	/**
-	 * @param string $path
-	 *
-	 * @return string
-	 */
 	private function pathToCamelCase(string $path): string{
 		$path = str_replace('/', '-', $path);
 
@@ -66,15 +68,10 @@ class GenerateRequests extends ClassGenerator {
 			$item = ucfirst($item);
 		}
 		unset($item);
-		$path = implode('', $path_arr);
 
-		return $path;
+		return implode('', $path_arr);
 	}
 
-	/**
-	 * @param string $path
-	 * @return string
-	 */
 	private function pathNoParams(string $path): string{
 		$path = substr($path, 1);
 
@@ -86,35 +83,23 @@ class GenerateRequests extends ClassGenerator {
 			}
 			$path_no_params[] = $item;
 		}
-		$path = implode('/', $path_no_params);
 
-		return $path;
+		return implode('/', $path_no_params);
 	}
 
-	/**
-	 * @param string $path
-	 *
-	 * @return string
-	 */
-	private function pathWithParamsNoPlaceholders(string $path){
+	private function pathWithParamsNoPlaceholders(string $path): string{
 		$path = substr($path, 1);
 
-		$path = explode('/', $path);
+		$parts = explode('/', $path);
 		$path_with_params = [];
-		foreach ($path as $item){
-			$item = str_replace('{', '', $item);
-			$item = str_replace('}', '', $item);
+		foreach ($parts as $item){
+			$item = str_replace(['{', '}'], '', $item);
 			$path_with_params[] = $item;
 		}
-		$path = implode('/', $path_with_params);
 
-		return $path;
+		return implode('/', $path_with_params);
 	}
 
-	/**
-	 * @param array $path_params
-	 * @param ClassType $class
-	 */
 	private function handlePathParams(array $path_params, ClassType $class): void{
 		if (empty($path_params)){
 			return;
@@ -135,7 +120,7 @@ class GenerateRequests extends ClassGenerator {
 			$type = $path_param['type'] ?? 'null';
 			$is_nullable = ($path_param['nullable'] ?? null)===true;
 			if ($is_nullable && $type!=='null'){
-			    $type = "?{$type}";
+				$type = "?{$type}";
 			}
 
 			$class->addProperty($param_name)
@@ -147,16 +132,12 @@ class GenerateRequests extends ClassGenerator {
 
 		if (!empty($param_names)){
 			$class->addProperty('path_params')
-				->setStatic(true)
+				->setStatic()
 				->setValue($param_names)
 				->setVisibility('protected');
 		}
 	}
 
-	/**
-	 * @param array $query_params
-	 * @param ClassType $class
-	 */
 	private function handleQueryParams(array $query_params, ClassType $class): void{
 		if (empty($query_params)){
 			return;
@@ -174,11 +155,11 @@ class GenerateRequests extends ClassGenerator {
 				$method = $class->addMethod('set'.$this->pathToCamelCase($query_param['name']));
 			}
 
-            $type = $path_param['type'] ?? 'null';
-            $is_nullable = ($path_param['nullable'] ?? null)===true;
-            if ($is_nullable && $type!=='null'){
-                $type = "?{$type}";
-            }
+			$type = $path_param['type'] ?? 'null';
+			$is_nullable = ($path_param['nullable'] ?? null)===true;
+			if ($is_nullable && $type!=='null'){
+				$type = "?{$type}";
+			}
 
 			$method->addParameter($param_name);
 			$class->addProperty($param_name)
@@ -193,23 +174,19 @@ class GenerateRequests extends ClassGenerator {
 				$query_params_property = $class->getProperty('query_params');
 				$query_params_array = $query_params_property->getValue();
 			}
-			catch (InvalidArgumentException $e){
+			catch (InvalidArgumentException $e) {
 				$query_params_property = $class->addProperty('query_params')
-					->setStatic(true)
+					->setStatic()
 					->setVisibility('protected');
 				$query_params_array = [];
 			}
 			$value = array_merge($query_params_array, $param_names);
-			$query_params_property->setStatic(true)
+			$query_params_property->setStatic()
 				->setValue($value)
 				->setVisibility('protected');
 		}
 	}
 
-	/**
-	 * @param array $method_details
-	 * @param ClassType $class
-	 */
 	protected function handleParams(array $method_details, ClassType $class): void{
 		$parameters = $method_details['parameters'] ?? [];
 		$path_params = $query_params = [];
@@ -232,11 +209,10 @@ class GenerateRequests extends ClassGenerator {
 	}
 
 	/**
-	 * @param string $dir
 	 * @throws RuntimeException
 	 * @throws FileNotFoundException
 	 */
-	public function saveClasses(string $dir) :void{
+	public function saveClasses(string $dir): void{
 		$dir = $this->dirNamespace($dir, self::NAMESPACE_REQUEST);
 		$use_ns = $this->namespaceModel();
 		$use = "use $use_ns\\SwaggerModel;\n";
@@ -244,19 +220,14 @@ class GenerateRequests extends ClassGenerator {
 	}
 
 	/**
-	 * @param string $dir
 	 * @throws FileNotFoundException
 	 */
-	public function dumpParentClass(string $dir) :void{
+	public function dumpParentClass(string $dir): void{
 		$dir = $this->dirNamespace($dir, self::NAMESPACE_REQUEST);
 		$this->dumpParentInternal($dir, __DIR__.'/SwaggerRequest.php', $this->namespaceRequest());
 		$this->dumpParentInternal($dir, __DIR__.'/SwaggerClient.php', $this->namespaceRequest(), $this->namespaceModel());
 	}
 
-	/**
-	 * @param array $parameter
-	 * @param ClassType $class
-	 */
 	private function handleBodyParam(array $parameter, ClassType $class): void{
 		$schema = $parameter['schema'];
 		if (empty($schema)){
@@ -275,8 +246,6 @@ class GenerateRequests extends ClassGenerator {
 	}
 
 	/**
-	 * @param array $method_details
-	 * @param ClassType $class
 	 * @throws InvalidArgumentException
 	 */
 	protected function handleResponse(array $method_details, ClassType $class): void{

@@ -35,7 +35,7 @@ abstract class ClassGenerator {
 	 * Creates a generator for a specific namespace
 	 */
 	public function __construct(string $namespace_name){
-		$this->namespace_name = $this->stringNotEndWith($namespace_name, '\\');
+		$this->namespace_name = self::stringNotEndWith($namespace_name, '\\');
 	}
 
 	protected function namespaceModel(): string{
@@ -105,8 +105,12 @@ abstract class ClassGenerator {
 		file_put_contents("$dir/$file_name", $content);
 	}
 
-	protected function stringNotEndWith(string $string, string $char): string{
+	protected static function stringNotEndWith(string $string, string $char): string{
 		return $string[strlen($string)-1]===$char ? substr($string, 0, -1) : $string;
+	}
+
+	protected static function stringNotBeginWith(string $string, string $char): string{
+		return $string[0]===$char ? substr($string, 1) : $string;
 	}
 
 	protected function unPlural(string $string): string{
@@ -132,7 +136,7 @@ abstract class ClassGenerator {
 	}
 
 	protected function dirNamespace(string $dir, string $namespace): string{
-		$dir = $this->stringNotEndWith($dir, '/');
+		$dir = self::stringNotEndWith($dir, '/');
 
 		return "$dir/$namespace";
 	}
