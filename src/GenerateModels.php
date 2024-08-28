@@ -2,7 +2,6 @@
 namespace SwaggerGen;
 
 use Nette\PhpGenerator\ClassType;
-use Nette\PhpGenerator\Method;
 use Nette\PhpGenerator\PhpNamespace;
 use Nette\PhpGenerator\Property;
 use RuntimeException;
@@ -16,8 +15,6 @@ class GenerateModels extends ClassGenerator {
 
 	/**
 	 * Generates classes in the "classes" field
-	 *
-	 * @param string $file_path
 	 * @throws RuntimeException
 	 */
 	public function generate(string $file_path) :void{
@@ -55,9 +52,6 @@ class GenerateModels extends ClassGenerator {
 	}
 
 	/**
-	 * @param array $properties
-	 * @param ClassType $class
-	 * @param array $required
 	 * @throws RuntimeException
 	 */
 	private function classProperties(array $properties, ClassType $class, ?array $required): void{
@@ -83,9 +77,6 @@ class GenerateModels extends ClassGenerator {
 				$typehint = $type;
 			}
 
-			/**
-			 * @var Property $property
-			 */
 			$property = $class->addProperty($property_name)->setVisibility('protected');
 			$property->addComment($property_details['description'] ?? "\n");
 
@@ -136,9 +127,6 @@ class GenerateModels extends ClassGenerator {
 			$class->addMethod('get'.$capital_case)
 				->setBody("return \$this->$property_name;")
 				->addComment("@return $comment_type");
-			/**
-			 * @var Method $setter
-			 */
 			$setter = $class->addMethod('set'.$capital_case)
 				->setBody("\$this->$property_name = \$$property_name;\n\nreturn \$this;")
 				->addComment("@param $comment_type \$$property_name")
@@ -153,9 +141,6 @@ class GenerateModels extends ClassGenerator {
 			if ($sub_type){
 				$property_name_singular = $this->unPlural($property_name);
 				$capital_case_singular = $this->unPlural($capital_case);
-				/**
-				 * @var Method $add_to
-				 */
 				$add_to = $class->addMethod('add'.$capital_case_singular)
 					->setBody("\$this->{$property_name}[] = \$$property_name_singular;\n\nreturn \$this;");
 
@@ -174,25 +159,17 @@ class GenerateModels extends ClassGenerator {
 		}
 	}
 
-	/**
-	 * @param string $dir
-	 */
 	public function saveClasses(string $dir) :void{
 		$dir = $this->dirNamespace($dir, self::NAMESPACE_MODEL);
 		$this->saveClassesInternal($dir, $this->namespaceModel());
 	}
 
-	/**
-	 * @param string $dir
-	 */
 	public function dumpParentClass(string $dir) :void{
 		$dir = $this->dirNamespace($dir, self::NAMESPACE_MODEL);
 		$this->dumpParentInternal($dir, __DIR__.'/SwaggerModel.php', $this->namespaceModel());
 	}
 
 	/**
-	 * @param Property $property
-	 * @param string $type
 	 * @throws RuntimeException
 	 */
 	private function blankValue(Property $property, string $type): void{

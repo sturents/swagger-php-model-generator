@@ -7,11 +7,8 @@ use JsonSerializable;
 class SwaggerModel implements JsonSerializable {
 	public const DATE_FORMAT = 'Y-m-d H:i:s';
 
-	private $_is_error = false;
+	private bool $_is_error = false;
 
-	/**
-	 * @return array
-	 */
 	public function toArray(): array{
 		$this->preOutput();
 
@@ -24,9 +21,7 @@ class SwaggerModel implements JsonSerializable {
 			$data[$key] = $val;
 		}
 
-		$data = $this->toArrayData($data);
-
-		return $data;
+		return $this->toArrayData($data);
 	}
 
 	/**
@@ -38,15 +33,11 @@ class SwaggerModel implements JsonSerializable {
 	/**
 	 * @return array
 	 */
+	#[\ReturnTypeWillChange]
 	public function jsonSerialize(){
 		return $this->toArray();
 	}
 
-	/**
-	 * @param array $data
-	 *
-	 * @return array
-	 */
 	private function toArrayData(array $data): array{
 		foreach ($data as &$val){
 
@@ -70,9 +61,6 @@ class SwaggerModel implements JsonSerializable {
 		return $data;
 	}
 
-	/**
-	 * @return bool
-	 */
 	public function isError(): bool{
 		return $this->_is_error;
 	}

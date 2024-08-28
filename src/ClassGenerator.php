@@ -24,20 +24,15 @@ abstract class ClassGenerator {
 	public const NAMESPACE_MODEL = 'Models';
 	public const NAMESPACE_REQUEST = 'Requests';
 
-	/**
-	 * @var string
-	 */
-	private $namespace_name;
+	private string $namespace_name;
 
 	/**
 	 * @var ClassType[]
 	 */
-	public $classes = [];
+	public array $classes = [];
 
 	/**
 	 * Creates a generator for a specific namespace
-	 *
-	 * @param string $namespace_name
 	 */
 	public function __construct(string $namespace_name){
 		$this->namespace_name = $this->stringNotEndWith($namespace_name, '\\');
@@ -55,11 +50,6 @@ abstract class ClassGenerator {
 
 	abstract public function generate(string $file_path);
 
-	/**
-	 * @param string $yaml_path
-	 * @param string $dir
-	 * @return int
-	 */
 	public function runFull(string $yaml_path, string $dir): int{
 		$this->generate($yaml_path);
 
@@ -69,13 +59,7 @@ abstract class ClassGenerator {
 		return count($this->classes);
 	}
 
-	/**
-	 * @param string $yaml_path
-	 * @param string $dir
-	 *
-	 * @return int
-	 */
-	public function runFullWithMoreSpecificity(string $yaml_path, string $dir){
+	public function runFullWithMoreSpecificity(string $yaml_path, string $dir): int{
 		$this->generate($yaml_path, true);
 
 		$this->saveClasses($dir);
@@ -87,9 +71,6 @@ abstract class ClassGenerator {
 	/**
 	 * Saves generated classes down as PHP files
 	 *
-	 * @param string $dir
-	 * @param string $namespace_name
-	 * @param string $use
 	 * @throws RuntimeException
 	 * @throws FileNotFoundException
 	 */
@@ -110,10 +91,6 @@ abstract class ClassGenerator {
 	abstract public function dumpParentClass(string $dir);
 
 	/**
-	 * @param string $dir
-	 * @param string $file
-	 * @param string $namespace
-	 * @param string $namespace_use
 	 * @throws FileNotFoundException
 	 */
 	protected function dumpParentInternal(string $dir, string $file, string $namespace, string $namespace_use = ''): void{
@@ -128,21 +105,10 @@ abstract class ClassGenerator {
 		file_put_contents("$dir/$file_name", $content);
 	}
 
-	/**
-	 * Utility function
-	 *
-	 * @param string $string
-	 * @param string $char
-	 * @return string
-	 */
 	protected function stringNotEndWith(string $string, string $char): string{
 		return $string[strlen($string)-1]===$char ? substr($string, 0, -1) : $string;
 	}
 
-	/**
-	 * @param string $string
-	 * @return string
-	 */
 	protected function unPlural(string $string): string{
 		if (substr($string, -3)==='ies'){
 			return substr($string, 0, -3).'y';
@@ -156,9 +122,6 @@ abstract class ClassGenerator {
 
 	/**
 	 * Changes a Swagger definition into a type
-	 *
-	 * @param array $property
-	 * @return string
 	 */
 	protected function typeFromRef(array $property): string{
 		if (!isset($property['$ref'])){
@@ -168,11 +131,6 @@ abstract class ClassGenerator {
 		return str_replace('#/definitions/', '', $property['$ref']);
 	}
 
-	/**
-	 * @param string $dir
-	 * @param string $namespace
-	 * @return string
-	 */
 	protected function dirNamespace(string $dir, string $namespace): string{
 		$dir = $this->stringNotEndWith($dir, '/');
 
@@ -180,8 +138,6 @@ abstract class ClassGenerator {
 	}
 
 	/**
-	 * @param string $dir
-	 * @return string
 	 * @throws FileNotFoundException
 	 */
 	private function checkDir(string $dir): string{
@@ -195,10 +151,6 @@ abstract class ClassGenerator {
 		return $dir;
 	}
 
-	/**
-	 * @param string $type
-	 * @return bool
-	 */
 	protected function notScalarType(string $type): bool{
 		return !in_array($type, ['integer', 'string', 'boolean', 'number', 'null']);
 	}

@@ -10,9 +10,7 @@ $opt_fields  = [
 	"dir",
 	"more-specificity",
 ];
-$options = getopt("", array_map(function($option){
-	return "{$option}:";
-}, $opt_fields));
+$options = getopt("", array_map(static fn($option) => "{$option}:", $opt_fields));
 
 $opt_errors = [];
 foreach ($opt_fields as $opt_field){

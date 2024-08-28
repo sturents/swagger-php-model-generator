@@ -304,7 +304,7 @@ class GenerateRequests extends ClassGenerator {
 				$type = "''";
 			}
 
-			$response_models[] = "'$code_string' => '$type'";
+			$response_models[] = "'$code_string' => $type";
 
 			if ((int)$code_string>0 && (int)$code_string<400){
 				$has_2xx = true;

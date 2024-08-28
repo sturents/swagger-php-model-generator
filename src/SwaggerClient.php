@@ -1,14 +1,18 @@
 <?php
 namespace SwaggerGen;
 
+use Psr\Http\Message\RequestInterface;
 use SwaggerGen\SwaggerModel;
 
 interface SwaggerClient {
 
 	/**
-	 * @param SwaggerRequest $request
-	 * @param string[] $response_models
-	 * @return SwaggerModel|SwaggerModel[]
+	 * @template T of SwaggerModel
+	 *
+	 * @param array<array-key, class-string<T>> $response_models
+	 * @return T|list<T>
 	 */
 	public function make(SwaggerRequest $request, array $response_models);
+
+	public function messageFromRequest(SwaggerRequest $swagger):RequestInterface;
 }
