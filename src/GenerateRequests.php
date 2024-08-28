@@ -20,19 +20,15 @@ use function strpos;
 class GenerateRequests extends ClassGenerator {
 
 	/**
-	 * @param string $file_path
-	 * @param bool $more_specificity
 	 * @throws InvalidArgumentException
 	 */
 	public function generate(string $file_path, bool $more_specificity = false): void{
 		$api = Yaml::parseFile($file_path);
 		$base_uri = self::stringNotEndWith($api['basePath'], '/');
 		foreach ($api['paths'] as $path => $path_details){
+			$path_no_params = $adapted_path = $this->pathNoParams($path);
 			if ($more_specificity){
 				$adapted_path = $this->pathWithParamsNoPlaceholders($path);
-			}
-			else {
-				$adapted_path = $this->pathNoParams($path);
 			}
 			$path_camel = $this->pathToCamelCase($adapted_path);
 			foreach ($path_details as $method => $method_details){
@@ -41,15 +37,7 @@ class GenerateRequests extends ClassGenerator {
 				$class->setExtends(self::REQUEST_CLASS_NAME);
 				$class->addComment($method_details['summary']);
 				$class->addConstant('METHOD', strtoupper($method));
-
-				if ($base_uri){
-					$path = self::stringNotBeginWith($path, '/');
-					$uri = "{$base_uri}/{$path}";
-				}
-				else {
-					$uri = $path;
-				}
-				$class->addConstant('URI', $uri);
+				$class->addConstant('URI', $base_uri ? "$base_uri/$path_no_params" : $path_no_params);
 
 				$this->handleParams($method_details, $class);
 
@@ -134,6 +122,7 @@ class GenerateRequests extends ClassGenerator {
 			$class->addProperty('path_params')
 				->setStatic()
 				->setValue($param_names)
+				->setType('array')
 				->setVisibility('protected');
 		}
 	}
@@ -177,12 +166,14 @@ class GenerateRequests extends ClassGenerator {
 			catch (InvalidArgumentException $e) {
 				$query_params_property = $class->addProperty('query_params')
 					->setStatic()
+					->setType('array')
 					->setVisibility('protected');
 				$query_params_array = [];
 			}
 			$value = array_merge($query_params_array, $param_names);
 			$query_params_property->setStatic()
 				->setValue($value)
+				->setType('array')
 				->setVisibility('protected');
 		}
 	}
@@ -253,6 +244,7 @@ class GenerateRequests extends ClassGenerator {
 
 		$model_ns = $this->namespaceModel();
 		$has_2xx = false;
+		$list_types = [];
 		foreach ($method_details['responses'] as $code_string => $method){
 			$get_type_from = isset($method['$ref']) ? $method : ($method['schema'] ?? null);
 			if (!is_null($get_type_from)){
@@ -263,7 +255,9 @@ class GenerateRequests extends ClassGenerator {
 					$type = $this->typeFromRef($get_type_from);
 				}
 				if ($this->notScalarType($type)){
-					$type = "\\$model_ns\\$type::class";
+					$class_string = "\\$model_ns\\$type";
+					$type = "$class_string::class";
+					$list_types[] = $class_string;
 				}
 				else {
 					$type = "''";
@@ -284,13 +278,20 @@ class GenerateRequests extends ClassGenerator {
 			throw new InvalidArgumentException('Response blocks must contain at least one positive response type');
 		}
 
+		$list_types = array_unique($list_types);
+		if (!$list_types){
+			$list_types = ['SwaggerModel'];
+		}
+		foreach ($list_types as $list_type){
+			$list_types[] = "list<$list_type>";
+		}
+
 		$response_models = implode(",\n\t", $response_models);
 		$response_models = "[\n\t$response_models\n]";
 		$class->addMethod('sendWith')
 			->addBody("return \$client->make(\$this, $response_models);")
-			->addComment('@param SwaggerClient $client')
-			->addComment('@return SwaggerModel')
+			->addComment('@return '.implode('|', $list_types))
 			->addParameter('client')
-			->setTypeHint('SwaggerClient');
+			->setType('SwaggerClient');
 	}
 }

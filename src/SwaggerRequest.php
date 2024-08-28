@@ -51,10 +51,7 @@ class SwaggerRequest {
 	public function getPath(): string{
 		$query = [];
 		foreach (static::$path_params as $param_name){
-			if (!isset($this->{$param_name})){
-				continue;
-			}
-			$query[] = $this->{$param_name};
+			$query[] = $this->{$param_name} ?? '';
 		}
 		if (count($query)>0){
 			return '/'.implode('/', $query);
