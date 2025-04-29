@@ -233,7 +233,7 @@ class GenerateRequests extends ClassGenerator {
 			->addComment("@param $model_class \$$name")
 			->setBody("\$this->body = json_encode(\$$name);")
 			->addParameter($name)
-			->setTypeHint($model_class);
+			->setType($model_class);
 	}
 
 	/**

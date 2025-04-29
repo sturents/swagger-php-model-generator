@@ -3,3 +3,4 @@ vendor/
 .idea/
 .phpintel/
 *.jar
+composer.lock
