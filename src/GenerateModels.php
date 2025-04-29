@@ -135,7 +135,7 @@ class GenerateModels extends ClassGenerator {
 
 			$set_parameter = $setter->addParameter($property_name);
 			if ($this->notScalarType($type)){
-				$set_parameter->setTypeHint($typehint);
+				$set_parameter->setType($typehint);
 			}
 
 			if ($sub_type){
@@ -146,7 +146,7 @@ class GenerateModels extends ClassGenerator {
 
 				$set_parameter = $add_to->addParameter($property_name_singular);
 				if ($this->notScalarType($sub_type)){
-					$set_parameter->setTypeHint($sub_typehint);
+					$set_parameter->setType($sub_typehint);
 				}
 
 				if ($is_nullable && $sub_type!=='null'){
