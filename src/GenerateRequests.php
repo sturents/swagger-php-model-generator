@@ -231,7 +231,7 @@ class GenerateRequests extends ClassGenerator {
 		$model_class = "\\$model_ns\\$type";
 		$class->addMethod('setBody')
 			->addComment("@param $model_class \$$name")
-			->setBody("\$this->body = json_encode(\$$name);")
+			->setBody("\$this->body = json_encode(\$$name, JSON_THROW_ON_ERROR);")
 			->addParameter($name)
 			->setType($model_class);
 	}
@@ -260,11 +260,11 @@ class GenerateRequests extends ClassGenerator {
 					$list_types[] = $class_string;
 				}
 				else {
-					$type = "''";
+					$type = "null";
 				}
 			}
 			else {
-				$type = "''";
+				$type = "null";
 			}
 
 			$response_models[] = "'$code_string' => $type";
