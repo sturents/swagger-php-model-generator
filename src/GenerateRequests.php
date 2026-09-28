@@ -98,7 +98,10 @@ class GenerateRequests extends ClassGenerator {
 		foreach ($path_params as $path_param){
 			$param_name = $path_param['name'];
 			$param_names[] = $param_name;
-			if (isset($path_param['required'])){
+			if (array_key_exists('default', $path_param)){
+				$constructor->addParameter($param_name, $path_param['default']);
+			}
+			elseif (isset($path_param['required'])){
 				$constructor->addParameter($param_name);
 			}
 			else {
@@ -144,17 +147,26 @@ class GenerateRequests extends ClassGenerator {
 				$method = $class->addMethod('set'.$this->pathToCamelCase($query_param['name']));
 			}
 
-			$type = $path_param['type'] ?? 'null';
-			$is_nullable = ($path_param['nullable'] ?? null)===true;
+			$type = $query_param['type'] ?? 'null';
+			$is_nullable = ($query_param['nullable'] ?? null)===true;
 			if ($is_nullable && $type!=='null'){
 				$type = "?{$type}";
 			}
 
-			$method->addParameter($param_name);
-			$class->addProperty($param_name)
+			$has_default = array_key_exists('default', $query_param);
+			if ($has_default){
+				$method->addParameter($param_name, $query_param['default']);
+			}
+			else {
+				$method->addParameter($param_name);
+			}
+			$property = $class->addProperty($param_name)
 				->addComment($query_param['description'])
 				->addComment('')
 				->addComment("@var {$type}");
+			if ($has_default && !$query_param['required']){
+				$property->setValue($query_param['default']);
+			}
 			$method->addBody("\$this->$param_name = \$$param_name;");
 		}
 
@@ -197,6 +209,25 @@ class GenerateRequests extends ClassGenerator {
 
 		$this->handlePathParams($path_params, $class);
 		$this->handleQueryParams($query_params, $class);
+		$this->sortConstructorParams($class);
+	}
+
+	private function sortConstructorParams(ClassType $class): void{
+		if (!$class->hasMethod('__construct')){
+			return;
+		}
+
+		$constructor = $class->getMethod('__construct');
+		$required = $optional = [];
+		foreach ($constructor->getParameters() as $parameter){
+			if ($parameter->hasDefaultValue()){
+				$optional[] = $parameter;
+			}
+			else {
+				$required[] = $parameter;
+			}
+		}
+		$constructor->setParameters(array_merge($required, $optional));
 	}
 
 	/**
